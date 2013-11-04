@@ -65,8 +65,10 @@ namespace GLCSGen
                     }
                     writer.WriteLine();
                     writer.WriteLine("using System;");
+                    writer.WriteLine("using System.Reflection;");
+                    writer.WriteLine("using System.Runtime.InteropServices;");
                     writer.WriteLine();
-                    writer.WriteLine("namespace GL");
+                    writer.WriteLine("namespace OpenGL");
                     writer.WriteOpenBrace();
                     writer.WriteLine("public static class {0}", version.Name);
                     writer.WriteOpenBrace();
@@ -84,7 +86,48 @@ namespace GLCSGen
                     writer.WriteLine("#region Commands");
                     foreach (var c in version.Commands)
                     {
-                        writer.WriteLine("public static {0}Func {0};", c.Name);
+                        StringBuilder builder = new StringBuilder("public static ");
+                        builder.Append(ConvertGLType(c.ReturnType));
+                        builder.AppendFormat(" {0}(", c.Name);
+                        BuildParameterList(c, builder);
+                        builder.Append(")");
+                        writer.WriteLine(builder.ToString());
+
+                        writer.WriteOpenBrace();
+
+                        writer.WriteLine("if ({0}Ptr == null)", c.Name);
+                        writer.WriteOpenBrace();
+                        writer.WriteLine("{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{0}\"), typeof({0}Func));", c.Name);
+                        writer.WriteCloseBrace();
+
+                        builder.Clear();
+                        if (c.ReturnType != "void")
+                        {
+                            builder.Append("return ");
+                        }
+                        builder.AppendFormat("{0}Ptr(", c.Name);
+
+                        if (c.Parameters.Count > 0)
+                        {
+                            foreach (var p in c.Parameters)
+                            {
+                                var name = p.Name;
+
+                                // Add @ to start of any names that are C# keywords to avoid conflict
+                                if (name == "params" || name == "string" || name == "ref" || name == "base")
+                                {
+                                    name = "@" + name;
+                                }
+
+                                builder.AppendFormat("{0}, ", name);
+                            }
+                            builder.Length -= 2;
+                        }
+
+                        builder.Append(");");
+                        writer.WriteLine(builder.ToString());
+
+                        writer.WriteCloseBrace();
                     }
                     writer.WriteLine("#endregion");
 
@@ -93,37 +136,59 @@ namespace GLCSGen
                     writer.WriteLine("#region Command Delegates");
                     foreach (var c in version.Commands)
                     {
-                        StringBuilder builder = new StringBuilder("public delegate ");
+                        StringBuilder builder = new StringBuilder("private delegate ");
                         builder.Append(ConvertGLType(c.ReturnType));
                         builder.AppendFormat(" {0}Func(", c.Name);
-                        
-                        foreach (var p in c.Parameters)
-                        {
-                            var name = p.Name;
-
-                            // Add @ to start of any names that are C# keywords to avoid conflict
-                            if (name == "params" || name == "string" || name == "ref" || name == "base")
-                            {
-                                name = "@" + name;
-                            }
-
-                            builder.AppendFormat("{0} {1}, ", ConvertGLType(p.Type), name);
-                        }
-
-                        if (c.Parameters.Count > 0)
-                        {
-                            builder.Length -= 2;
-                        }
-
+                        BuildParameterList(c, builder);
                         builder.Append(");");
 
                         writer.WriteLine(builder.ToString());
+                        writer.WriteLine("private static {0}Func {0}Ptr;", c.Name);
                     }
+                    writer.WriteLine("#endregion");
+
+                    writer.WriteLine();
+                    writer.WriteLine("#region Interop");
+                    writer.WriteLine("public static Func<string, IntPtr> GetProcAddress = null;");
+                    writer.WriteLine();
+                    writer.WriteLine("public static void PreloadAllFunctions()");
+                    writer.WriteOpenBrace();
+                    foreach (var c in version.Commands)
+                    {
+                        writer.WriteLine("{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{0}\"), typeof({0}Func));", c.Name);
+                    }
+                    writer.WriteCloseBrace();
+                    writer.WriteLine();
+                    writer.WriteLine("public static void PreloadFunction(string name)");
+                    writer.WriteOpenBrace();
+                    writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.NonPublic | BindingFlags.Static);", version.Name);
+                    writer.WriteLine("memberInfo.SetValue(null, Marshal.GetDelegateForFunctionPointer(GetProcAddress(name), memberInfo.FieldType));");
+                    writer.WriteCloseBrace();
                     writer.WriteLine("#endregion");
 
                     writer.WriteCloseBrace();
                     writer.WriteCloseBrace();
                 }
+            }
+        }
+
+        private static void BuildParameterList(GLCommand c, StringBuilder builder)
+        {
+            if (c.Parameters.Count > 0)
+            {
+                foreach (var p in c.Parameters)
+                {
+                    var name = p.Name;
+
+                    // Add @ to start of any names that are C# keywords to avoid conflict
+                    if (name == "params" || name == "string" || name == "ref" || name == "base")
+                    {
+                        name = "@" + name;
+                    }
+
+                    builder.AppendFormat("{0} {1}, ", ConvertGLType(p.Type), name);
+                }
+                builder.Length -= 2;
             }
         }
 
