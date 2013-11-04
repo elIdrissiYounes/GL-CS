@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SDL2;
+﻿using SDL2;
+using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using GL = OpenGL.GL21;
-using System.Diagnostics;
 
 namespace GLCSTest
 {
@@ -27,11 +23,13 @@ namespace GLCSTest
 
             IntPtr context = SDL.SDL_GL_CreateContext(window);
             SDL.SDL_GL_MakeCurrent(window, context);
+
+            // Set the GetProcAddress delegate for OpenGL and load all function pointers
             GL.GetProcAddress = SDL.SDL_GL_GetProcAddress;
+            GL.LoadAllFunctions();
 
             Console.WriteLine("OpenGL Version: {0}", Marshal.PtrToStringAnsi(GL.glGetString(GL.GL_VERSION)));
 
-            GL.PreloadAllFunctions();
 
             Stopwatch watch = new Stopwatch();
             watch.Start();

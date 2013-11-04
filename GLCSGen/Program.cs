@@ -95,11 +95,6 @@ namespace GLCSGen
 
                         writer.WriteOpenBrace();
 
-                        writer.WriteLine("if ({0}Ptr == null)", c.Name);
-                        writer.WriteOpenBrace();
-                        writer.WriteLine("{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{0}\"), typeof({0}Func));", c.Name);
-                        writer.WriteCloseBrace();
-
                         builder.Clear();
                         if (c.ReturnType != "void")
                         {
@@ -151,7 +146,7 @@ namespace GLCSGen
                     writer.WriteLine("#region Interop");
                     writer.WriteLine("public static Func<string, IntPtr> GetProcAddress = null;");
                     writer.WriteLine();
-                    writer.WriteLine("public static void PreloadAllFunctions()");
+                    writer.WriteLine("public static void LoadAllFunctions()");
                     writer.WriteOpenBrace();
                     foreach (var c in version.Commands)
                     {
@@ -159,7 +154,7 @@ namespace GLCSGen
                     }
                     writer.WriteCloseBrace();
                     writer.WriteLine();
-                    writer.WriteLine("public static void PreloadFunction(string name)");
+                    writer.WriteLine("public static void LoadFunction(string name)");
                     writer.WriteOpenBrace();
                     writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.NonPublic | BindingFlags.Static);", version.Name);
                     writer.WriteLine("memberInfo.SetValue(null, Marshal.GetDelegateForFunctionPointer(GetProcAddress(name), memberInfo.FieldType));");
