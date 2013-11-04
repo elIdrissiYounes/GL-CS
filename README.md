@@ -5,4 +5,4 @@ GL-CS is a little project where I'm going to try and make a system for reading i
 
 At this point consider the project a toy unfit for any real use. Feel free to help contribute if you have experience either in parsing the gl.xml spec or in generating C# wrappers for OpenGL.
 
-GL-CS is available under the MIT License.
+GL-CS is available under the zlib License.
