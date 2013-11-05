@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B6370117-DBCB-45FB-8244-E2FC5C70F997}</ProjectGuid>
+    <ProjectGuid>{72b6ef8a-d7cd-4241-9eb5-0a11e9e4f542}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenGL</RootNamespace>
-    <AssemblyName>GL-CS</AssemblyName>
+    <AssemblyName>GLES-CS</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -39,32 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GL10.cs" />
-    <Compile Include="GL11.cs" />
-    <Compile Include="GL12.cs" />
-    <Compile Include="GL13.cs" />
-    <Compile Include="GL14.cs" />
-    <Compile Include="GL15.cs" />
-    <Compile Include="GL20.cs" />
-    <Compile Include="GL21.cs" />
-    <Compile Include="GL30Compatibility.cs" />
-    <Compile Include="GL30Core.cs" />
-    <Compile Include="GL31Compatibility.cs" />
-    <Compile Include="GL31Core.cs" />
-    <Compile Include="GL32Compatibility.cs" />
-    <Compile Include="GL32Core.cs" />
-    <Compile Include="GL33Compatibility.cs" />
-    <Compile Include="GL33Core.cs" />
-    <Compile Include="GL40Compatibility.cs" />
-    <Compile Include="GL40Core.cs" />
-    <Compile Include="GL41Compatibility.cs" />
-    <Compile Include="GL41Core.cs" />
-    <Compile Include="GL42Compatibility.cs" />
-    <Compile Include="GL42Core.cs" />
-    <Compile Include="GL43Compatibility.cs" />
-    <Compile Include="GL43Core.cs" />
-    <Compile Include="GL44Compatibility.cs" />
-    <Compile Include="GL44Core.cs" />
+    <Compile Include="GLES10.cs" />
+    <Compile Include="GLES20.cs" />
+    <Compile Include="GLES30.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
