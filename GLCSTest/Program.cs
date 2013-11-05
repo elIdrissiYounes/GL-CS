@@ -15,10 +15,10 @@ namespace GLCSTest
 
             IntPtr window = SDL.SDL_CreateWindow(
                 "GL-CS Test",
-                SDL.SDL_WINDOWPOS_CENTERED, 
                 SDL.SDL_WINDOWPOS_CENTERED,
-                1280,
-                720, 
+                SDL.SDL_WINDOWPOS_CENTERED,
+                960,
+                540,
                 SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
 
             IntPtr context = SDL.SDL_GL_CreateContext(window);

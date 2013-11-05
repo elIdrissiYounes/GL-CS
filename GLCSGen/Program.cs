@@ -179,7 +179,7 @@ namespace GLCSGen
                     writer.WriteLine();
                     writer.WriteLine("public static void LoadFunction(string name)");
                     writer.WriteOpenBrace();
-                    writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.NonPublic | BindingFlags.Static);", isolated ? version.Name : (version.Api + "Interop"));
+                    writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.{1} | BindingFlags.Static);", isolated ? version.Name : (version.Api + "Interop"), isolated ? "NonPublic" : "Public");
                     writer.WriteLine("memberInfo.SetValue(null, Marshal.GetDelegateForFunctionPointer(GetProcAddress(name), memberInfo.FieldType));");
                     writer.WriteCloseBrace();
                     writer.WriteLine("#endregion");
