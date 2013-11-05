@@ -41,6 +41,11 @@ namespace GLCSGen
             // reduces assembly size by removing lots and lots of duplicate delegate types and function pointers.
             bool isolated = args.Contains("--isolated");
 
+            // Since error handling code adds size to the generated assemblies, there is now an option to remove
+            // it for people who want extremely trim assemblies and don't mind dealing with harder-to-read error
+            // messages when function pointers fail to load.
+            bool errorHandling = !args.Contains("--no-error-check");
+
             // Walk up to the solution file so we can then go into GL-CS and write to the C# files directly
             DirectoryInfo directory = new DirectoryInfo(Directory.GetCurrentDirectory());
             while (directory != null && !File.Exists(Path.Combine(directory.FullName, "GL-CS.sln")))
@@ -163,27 +168,51 @@ namespace GLCSGen
                     foreach (var c in version.Commands)
                     {
                         var delegateName = isolated ? c.Name : (version.Api + "Interop." + c.Name);
-                        writer.WriteLine("try {{ {0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{1}\"), typeof({0}Func)); }}", delegateName, c.Name);
-                        writer.WriteLine("catch {{ throw new InvalidOperationException(\"Failed to get function pointer for '{0}'.\"); }}", c.Name);
+                        string getFuncPtrCode = string.Format("{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{1}\"), typeof({0}Func));", delegateName, c.Name);
+
+                        if (errorHandling)
+                        {
+                            writer.WriteLine("try {{ {0} }}", getFuncPtrCode);
+                            writer.WriteLine("catch {{ throw new InvalidOperationException(\"Failed to get function pointer for '{0}'.\"); }}", c.Name);
+                        }
+                        else
+                        {
+                            writer.WriteLine(getFuncPtrCode);
+                        }
                     }
                     writer.WriteCloseBrace();
                     writer.WriteLine();
                     writer.WriteLine("public static void LoadFunction(string name)");
                     writer.WriteOpenBrace();
-                    writer.WriteLine("try");
-                    writer.WriteOpenBrace();
+                    if (errorHandling)
+                    {
+                        writer.WriteLine("try");
+                        writer.WriteOpenBrace();
+                    }
                     writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.{1} | BindingFlags.Static);", isolated ? version.Name : (version.Api + "Interop"), isolated ? "NonPublic" : "Public");
-                    writer.WriteLine("Debug.Assert(memberInfo != null, string.Format(\"Failed to find function delegate. Ensure '{0}' is a valid OpenGL function.\", name));");
+                    if (errorHandling)
+                    {
+                        writer.WriteLine("Debug.Assert(memberInfo != null, string.Format(\"Failed to find function delegate. Ensure '{0}' is a valid OpenGL function.\", name));");
+                    }
                     writer.WriteLine("var procAddr = GetProcAddress(name);");
-                    writer.WriteLine("Debug.Assert(procAddr != IntPtr.Zero, string.Format(\"Failed to find function address. Ensure '{0}' is a valid OpenGL function.\", name));");
+                    if (errorHandling)
+                    {
+                        writer.WriteLine("Debug.Assert(procAddr != IntPtr.Zero, string.Format(\"Failed to find function address. Ensure '{0}' is a valid OpenGL function.\", name));");
+                    }
                     writer.WriteLine("var funcPtr = Marshal.GetDelegateForFunctionPointer(procAddr, memberInfo.FieldType);");
-                    writer.WriteLine("Debug.Assert(funcPtr != null, string.Format(\"Failed to convert function address to delegate for '{0}'.\", name));");
+                    if (errorHandling)
+                    {
+                        writer.WriteLine("Debug.Assert(funcPtr != null, string.Format(\"Failed to convert function address to delegate for '{0}'.\", name));");
+                    }
                     writer.WriteLine("memberInfo.SetValue(null, funcPtr);");
-                    writer.WriteCloseBrace();
-                    writer.WriteLine("catch");
-                    writer.WriteOpenBrace();
-                    writer.WriteLine("throw new InvalidOperationException(string.Format(\"Failed to load function '{0}'.\", name));");
-                    writer.WriteCloseBrace();
+                    if (errorHandling)
+                    {
+                        writer.WriteCloseBrace();
+                        writer.WriteLine("catch");
+                        writer.WriteOpenBrace();
+                        writer.WriteLine("throw new InvalidOperationException(string.Format(\"Failed to load function '{0}'.\", name));");
+                        writer.WriteCloseBrace();
+                    }
                     writer.WriteCloseBrace();
                     writer.WriteLine("#endregion");
 
