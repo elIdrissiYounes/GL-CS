@@ -150,17 +150,7 @@ namespace GLCSGen
                         writer.WriteLine();
 
                         writer.WriteLine("#region Command Delegates");
-                        foreach (var c in version.Commands)
-                        {
-                            StringBuilder builder = new StringBuilder("private delegate ");
-                            builder.Append(ConvertGLType(c.ReturnType));
-                            builder.AppendFormat(" {0}Func(", c.Name);
-                            BuildParameterList(c, builder);
-                            builder.Append(");");
-
-                            writer.WriteLine(builder.ToString());
-                            writer.WriteLine("private static {0}Func {0}Ptr;", c.Name);
-                        }
+                        WriteDelegates(writer, "private", version.Commands);
                         writer.WriteLine("#endregion");
                     }
 
@@ -173,14 +163,27 @@ namespace GLCSGen
                     foreach (var c in version.Commands)
                     {
                         var delegateName = isolated ? c.Name : (version.Api + "Interop." + c.Name);
-                        writer.WriteLine("{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{1}\"), typeof({0}Func));", delegateName, c.Name);
+                        writer.WriteLine("try {{ {0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{1}\"), typeof({0}Func)); }}", delegateName, c.Name);
+                        writer.WriteLine("catch {{ throw new InvalidOperationException(\"Failed to get function pointer for '{0}'.\"); }}", c.Name);
                     }
                     writer.WriteCloseBrace();
                     writer.WriteLine();
                     writer.WriteLine("public static void LoadFunction(string name)");
                     writer.WriteOpenBrace();
+                    writer.WriteLine("try");
+                    writer.WriteOpenBrace();
                     writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.{1} | BindingFlags.Static);", isolated ? version.Name : (version.Api + "Interop"), isolated ? "NonPublic" : "Public");
-                    writer.WriteLine("memberInfo.SetValue(null, Marshal.GetDelegateForFunctionPointer(GetProcAddress(name), memberInfo.FieldType));");
+                    writer.WriteLine("Debug.Assert(memberInfo != null, string.Format(\"Failed to find function delegate. Ensure '{0}' is a valid OpenGL function.\", name));");
+                    writer.WriteLine("var procAddr = GetProcAddress(name);");
+                    writer.WriteLine("Debug.Assert(procAddr != IntPtr.Zero, string.Format(\"Failed to find function address. Ensure '{0}' is a valid OpenGL function.\", name));");
+                    writer.WriteLine("var funcPtr = Marshal.GetDelegateForFunctionPointer(procAddr, memberInfo.FieldType);");
+                    writer.WriteLine("Debug.Assert(funcPtr != null, string.Format(\"Failed to convert function address to delegate for '{0}'.\", name));");
+                    writer.WriteLine("memberInfo.SetValue(null, funcPtr);");
+                    writer.WriteCloseBrace();
+                    writer.WriteLine("catch");
+                    writer.WriteOpenBrace();
+                    writer.WriteLine("throw new InvalidOperationException(string.Format(\"Failed to load function '{0}'.\", name));");
+                    writer.WriteCloseBrace();
                     writer.WriteCloseBrace();
                     writer.WriteLine("#endregion");
 
@@ -220,19 +223,7 @@ namespace GLCSGen
                 writer.WriteOpenBrace();
                 writer.WriteLine("internal static class {0}Interop", api);
                 writer.WriteOpenBrace();
-
-                foreach (var c in commands)
-                {
-                    StringBuilder builder = new StringBuilder("public delegate ");
-                    builder.Append(ConvertGLType(c.ReturnType));
-                    builder.AppendFormat(" {0}Func(", c.Name);
-                    BuildParameterList(c, builder);
-                    builder.Append(");");
-
-                    writer.WriteLine(builder.ToString());
-                    writer.WriteLine("public static {0}Func {0}Ptr;", c.Name);
-                }
-
+                WriteDelegates(writer, "public", commands);
                 writer.WriteCloseBrace();
                 writer.WriteCloseBrace();
             }
@@ -248,10 +239,27 @@ namespace GLCSGen
             }
             writer.WriteLine();
             writer.WriteLine("using System;");
+            writer.WriteLine("using System.Diagnostics;");
             writer.WriteLine("using System.Reflection;");
             writer.WriteLine("using System.Runtime.InteropServices;");
             writer.WriteLine();
             writer.WriteLine("namespace OpenGL");
+        }
+
+        private static void WriteDelegates(CodeWriter writer, string accessModifier, IEnumerable<GLCommand> commands)
+        {
+            foreach (var c in commands)
+            {
+                StringBuilder builder = new StringBuilder();
+                builder.AppendFormat("{0} delegate ", accessModifier);
+                builder.Append(ConvertGLType(c.ReturnType));
+                builder.AppendFormat(" {0}Func(", c.Name);
+                BuildParameterList(c, builder);
+                builder.Append(");");
+
+                writer.WriteLine(builder.ToString());
+                writer.WriteLine("{0} static {1}Func {1}Ptr;", accessModifier, c.Name);
+            }
         }
 
         private static void BuildParameterList(GLCommand c, StringBuilder builder)
