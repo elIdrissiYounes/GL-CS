@@ -24,12 +24,15 @@ namespace GLCSTest
             IntPtr context = SDL.SDL_GL_CreateContext(window);
             SDL.SDL_GL_MakeCurrent(window, context);
 
-            // Set the GetProcAddress delegate for OpenGL and load all function pointers
+            // Set the GetProcAddress delegate for OpenGL to be able to get function pointers
             GL.GetProcAddress = SDL.SDL_GL_GetProcAddress;
-            GL.LoadAllFunctions();
 
+            // Load an individual function so we can get the version string
+            GL.LoadFunction("glGetString");
             Console.WriteLine("OpenGL Version: {0}", Marshal.PtrToStringAnsi(GL.glGetString(GL.GL_VERSION)));
 
+            // Now load the rest of the functions in one go
+            GL.LoadAllFunctions();
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
