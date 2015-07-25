@@ -8,27 +8,25 @@ namespace GLCSGen.Spec
 {
     public class GlSpec : IGlSpec
     {
-        private readonly List<IGlCommand> _commands = new List<IGlCommand>();
-        private readonly List<IGlEnumeration> _enumerations = new List<IGlEnumeration>();
-
         public GlSpec(XDocument doc)
         {
-            ParseEnums(doc);
-            ParseCommands(doc);
+            Enumerations = ParseEnums(doc);
+            Commands = ParseCommands(doc);
         }
 
-        public IReadOnlyList<IGlEnumeration> Enumerations => _enumerations;
-        public IReadOnlyList<IGlCommand> Commands => _commands;
+        public IReadOnlyList<IGlEnumeration> Enumerations { get; }
+        public IReadOnlyList<IGlCommand> Commands { get; }
 
-        private void ParseCommands(XDocument doc)
+        private static IReadOnlyList<IGlCommand> ParseCommands(XDocument doc)
         {
+            var commands = new List<IGlCommand>();
+
             foreach (var commandsNode in doc.Root.Elements("commands"))
             {
-                foreach (var commandNode in commandsNode.Elements("command"))
-                {
-                    _commands.Add(ParseCommand(commandNode));
-                }
+                commands.AddRange(commandsNode.Elements("command").Select(ParseCommand));
             }
+
+            return commands;
         }
 
         private static IGlCommand ParseCommand(XElement commandNode)
@@ -54,18 +52,19 @@ namespace GLCSGen.Spec
             return glParameter;
         }
 
-        private void ParseEnums(XDocument doc)
+        private static IReadOnlyList<IGlEnumeration> ParseEnums(XDocument doc)
         {
+            var enumerations = new List<IGlEnumeration>();
+
             foreach (var enumsNode in doc.Root.Elements("enums"))
             {
-                foreach (var enumNode in enumsNode.Elements("enum"))
-                {
-                    _enumerations.Add(ParseEnum(enumNode));
-                }
+                enumerations.AddRange(enumsNode.Elements("enum").Select(ParseEnum));
             }
+
+            return enumerations;
         }
 
-        private IGlEnumeration ParseEnum(XElement enumNode)
+        private static IGlEnumeration ParseEnum(XElement enumNode)
         {
             var name = enumNode.Attribute("name")?.Value;
             var value = enumNode.Attribute("value")?.Value;
