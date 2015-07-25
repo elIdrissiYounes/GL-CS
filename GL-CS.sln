@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLCSGen", "GLCSGen\GLCSGen.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLCSTest", "GLCSTest\GLCSTest.csproj", "{84011D07-4DA3-4813-A74F-9EBDA9744DC3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generated Libraries", "Generated Libraries", "{7CE8403D-D350-4E5E-AB45-0CB68E8B789F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLCSGenTests", "GLCSGenTests\GLCSGenTests.csproj", "{93C40AE1-021A-41F5-9473-D9BCBC473F46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +37,16 @@ Global
 		{84011D07-4DA3-4813-A74F-9EBDA9744DC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84011D07-4DA3-4813-A74F-9EBDA9744DC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84011D07-4DA3-4813-A74F-9EBDA9744DC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93C40AE1-021A-41F5-9473-D9BCBC473F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93C40AE1-021A-41F5-9473-D9BCBC473F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93C40AE1-021A-41F5-9473-D9BCBC473F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93C40AE1-021A-41F5-9473-D9BCBC473F46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B6370117-DBCB-45FB-8244-E2FC5C70F997} = {7CE8403D-D350-4E5E-AB45-0CB68E8B789F}
+		{72B6EF8A-D7CD-4241-9EB5-0A11E9E4F542} = {7CE8403D-D350-4E5E-AB45-0CB68E8B789F}
 	EndGlobalSection
 EndGlobal

@@ -3,9 +3,9 @@ using System.IO;
 
 namespace GLCSGen
 {
-    internal class CodeWriter : IDisposable
+    public sealed class CodeWriter
     {
-        private readonly StreamWriter _writer;
+        private readonly TextWriter _writer;
         private int _tabCount;
         private string _tabString = string.Empty;
 
@@ -19,25 +19,9 @@ namespace GLCSGen
             }
         }
 
-        public CodeWriter(string filename)
+        public CodeWriter(TextWriter writer)
         {
-            _writer = new StreamWriter(filename);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~CodeWriter()
-        {
-            Dispose(false);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            _writer.Dispose();
+            _writer = writer;
         }
 
         public void WriteLine()
@@ -57,13 +41,13 @@ namespace GLCSGen
             _writer.WriteLine(format, args);
         }
 
-        public void WriteOpenBrace()
+        public void WriteOpenBraceAndIndent()
         {
             WriteLine("{");
             TabCount++;
         }
 
-        public void WriteCloseBrace()
+        public void DedentAndWriteCloseBrace()
         {
             TabCount--;
             WriteLine("}");

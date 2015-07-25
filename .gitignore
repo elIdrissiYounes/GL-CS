@@ -1,4 +1,8 @@
+.vs
 *.user
 *.suo
-*/bin/*
-*/obj/*
+bin/
+obj/
+packages/
+.DS_Store
+Thumbs.db
