@@ -1,76 +1,76 @@
-﻿using SDL2;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using GL = OpenGL.GL21;
+using static OpenGL.GL21;
+using static SDL2.SDL;
 
 namespace GLCSTest
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main()
         {
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 1);
+            SDL_GL_SetAttribute(SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+            SDL_GL_SetAttribute(SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-            IntPtr window = SDL.SDL_CreateWindow(
-                "GL-CS Test",
-                SDL.SDL_WINDOWPOS_CENTERED,
-                SDL.SDL_WINDOWPOS_CENTERED,
-                960,
-                540,
-                SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+            var window = SDL_CreateWindow("GL-CS Test",
+                                          SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED,
+                                          960,
+                                          540,
+                                          SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL_WindowFlags.SDL_WINDOW_SHOWN);
 
-            IntPtr context = SDL.SDL_GL_CreateContext(window);
-            SDL.SDL_GL_MakeCurrent(window, context);
+            var context = SDL_GL_CreateContext(window);
+            SDL_GL_MakeCurrent(window, context);
 
             // Set the GetProcAddress delegate for OpenGL to be able to get function pointers
-            GL.GetProcAddress = SDL.SDL_GL_GetProcAddress;
+            GetProcAddress = SDL_GL_GetProcAddress;
 
             // Load an individual function so we can get the version string
-            GL.LoadFunction("glGetString");
-            Console.WriteLine("OpenGL Version: {0}", Marshal.PtrToStringAnsi(GL.glGetString(GL.GL_VERSION)));
+            LoadFunction("glGetString");
+            Console.WriteLine("OpenGL Version: {0}", Marshal.PtrToStringAnsi(glGetString(GL_VERSION)));
 
             // Now load the rest of the functions in one go
-            GL.LoadAllFunctions();
+            LoadAllFunctions();
 
-            Stopwatch watch = new Stopwatch();
+            var watch = new Stopwatch();
             watch.Start();
 
-            double totalTime = 0;
-            bool running = true;
+            var running = true;
             while (running)
             {
-                SDL.SDL_Event evt;
-                while (SDL.SDL_PollEvent(out evt) != 0)
+                SDL_Event evt;
+                while (SDL_PollEvent(out evt) != 0)
                 {
-                    if (evt.type == SDL.SDL_EventType.SDL_QUIT)
+                    if (evt.type == SDL_EventType.SDL_QUIT)
                     {
                         running = false;
                     }
                 }
 
-                totalTime += watch.Elapsed.TotalSeconds;
                 watch.Restart();
 
-                GL.glClearColor(0f, 0f, 0f, 1f);
-                GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+                glClearColor(0f, 0f, 0f, 1f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+                glBegin(GL_TRIANGLES);
 
-                GL.glBegin(GL.GL_TRIANGLES);
+                glColor3f(1, 0, 0);
+                glVertex3f(-.5f, -.5f, 0);
 
-                GL.glColor3f(1, 0, 0); GL.glVertex3f(-.5f, -.5f, 0);
-                GL.glColor3f(0, 1, 0); GL.glVertex3f(0, .5f, 0);
-                GL.glColor3f(0, 0, 1); GL.glVertex3f(.5f, -.5f, 0);
+                glColor3f(0, 1, 0);
+                glVertex3f(0, .5f, 0);
 
-                GL.glEnd();
+                glColor3f(0, 0, 1);
+                glVertex3f(.5f, -.5f, 0);
 
+                glEnd();
 
-                GL.glFlush();
-                SDL.SDL_GL_SwapWindow(window);
+                glFlush();
+                SDL_GL_SwapWindow(window);
             }
 
-            SDL.SDL_DestroyWindow(window);
+            SDL_DestroyWindow(window);
         }
     }
 }
