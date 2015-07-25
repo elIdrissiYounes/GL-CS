@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (c) 2013, Nick Gravelyn.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event will the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- *    1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- *
- *    2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- *
- *    3. This notice may not be removed or altered from any source
- *    distribution.
- *
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -33,21 +9,21 @@ namespace GLCSGen
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // Isolated mode generates files like we always have, with each C# file being completely standalone
             // with its own set of delegates under the hood. Without isolated mode, the new default is to generate
             // a single interop type per assembly and have each GL version share those function pointers. This
             // reduces assembly size by removing lots and lots of duplicate delegate types and function pointers.
-            bool isolated = args.Contains("--isolated");
+            var isolated = args.Contains("--isolated");
 
             // Since error handling code adds size to the generated assemblies, there is now an option to remove
             // it for people who want extremely trim assemblies and don't mind dealing with harder-to-read error
             // messages when function pointers fail to load.
-            bool errorHandling = !args.Contains("--no-error-check");
+            var errorHandling = !args.Contains("--no-error-check");
 
             // Walk up to the solution file so we can then go into GL-CS and write to the C# files directly
-            DirectoryInfo directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
             while (directory != null && !File.Exists(Path.Combine(directory.FullName, "GL-CS.sln")))
             {
                 directory = directory.Parent;
@@ -95,7 +71,7 @@ namespace GLCSGen
                     writer.WriteLine("#region Enums");
                     foreach (var e in version.Enums)
                     {
-                        string type = IsUint(e.Value) ? "uint" : "ulong";
+                        var type = IsUint(e.Value) ? "uint" : "ulong";
                         writer.WriteLine("public static {0} {1} = {2};", type, e.Key, e.Value);
                     }
                     writer.WriteLine("#endregion");
@@ -105,7 +81,7 @@ namespace GLCSGen
                     writer.WriteLine("#region Commands");
                     foreach (var c in version.Commands)
                     {
-                        StringBuilder builder = new StringBuilder("public static ");
+                        var builder = new StringBuilder("public static ");
                         builder.Append(ConvertGLType(c.ReturnType));
                         builder.AppendFormat(" {0}(", c.Name);
                         BuildParameterList(c, builder);
@@ -168,7 +144,10 @@ namespace GLCSGen
                     foreach (var c in version.Commands)
                     {
                         var delegateName = isolated ? c.Name : (version.Api + "Interop." + c.Name);
-                        string getFuncPtrCode = string.Format("{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{1}\"), typeof({0}Func));", delegateName, c.Name);
+                        var getFuncPtrCode = string.Format(
+                                                           "{0}Ptr = ({0}Func)Marshal.GetDelegateForFunctionPointer(GetProcAddress(\"{1}\"), typeof({0}Func));",
+                                                           delegateName,
+                                                           c.Name);
 
                         if (errorHandling)
                         {
@@ -189,15 +168,19 @@ namespace GLCSGen
                         writer.WriteLine("try");
                         writer.WriteOpenBrace();
                     }
-                    writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.{1} | BindingFlags.Static);", isolated ? version.Name : (version.Api + "Interop"), isolated ? "NonPublic" : "Public");
+                    writer.WriteLine("var memberInfo = typeof({0}).GetField(name + \"Ptr\", BindingFlags.{1} | BindingFlags.Static);",
+                                     isolated ? version.Name : (version.Api + "Interop"),
+                                     isolated ? "NonPublic" : "Public");
                     if (errorHandling)
                     {
-                        writer.WriteLine("Debug.Assert(memberInfo != null, string.Format(\"Failed to find function delegate. Ensure '{0}' is a valid OpenGL function.\", name));");
+                        writer.WriteLine(
+                                         "Debug.Assert(memberInfo != null, string.Format(\"Failed to find function delegate. Ensure '{0}' is a valid OpenGL function.\", name));");
                     }
                     writer.WriteLine("var procAddr = GetProcAddress(name);");
                     if (errorHandling)
                     {
-                        writer.WriteLine("Debug.Assert(procAddr != IntPtr.Zero, string.Format(\"Failed to find function address. Ensure '{0}' is a valid OpenGL function.\", name));");
+                        writer.WriteLine(
+                                         "Debug.Assert(procAddr != IntPtr.Zero, string.Format(\"Failed to find function address. Ensure '{0}' is a valid OpenGL function.\", name));");
                     }
                     writer.WriteLine("var funcPtr = Marshal.GetDelegateForFunctionPointer(procAddr, memberInfo.FieldType);");
                     if (errorHandling)
@@ -225,7 +208,7 @@ namespace GLCSGen
         private static void CreateGLInterop(GLSpec spec, DirectoryInfo outDir, string api)
         {
             // Get the unique list of all commands
-            List<GLCommand> commands = new List<GLCommand>();
+            var commands = new List<GLCommand>();
             foreach (var version in spec.Versions)
             {
                 if (version.Api != api)
@@ -279,7 +262,7 @@ namespace GLCSGen
         {
             foreach (var c in commands)
             {
-                StringBuilder builder = new StringBuilder();
+                var builder = new StringBuilder();
                 builder.AppendFormat("{0} delegate ", accessModifier);
                 builder.Append(ConvertGLType(c.ReturnType));
                 builder.AppendFormat(" {0}Func(", c.Name);
@@ -317,43 +300,44 @@ namespace GLCSGen
             {
                 return "bool";
             }
-            else if (type == "GLuint" || type == "GLenum" || type == "GLbitfield")
+            if (type == "GLuint" || type == "GLenum" || type == "GLbitfield")
             {
                 return "uint";
             }
-            else if (type == "GLint" || type == "GLsizei" || type == "GLsizeiptr" || type == "GLfixed" || type == "GLclampx" || type == "GLintptrARB" || type == "GLsizeiptrARB")
+            if (type == "GLint" || type == "GLsizei" || type == "GLsizeiptr" || type == "GLfixed" || type == "GLclampx" || type == "GLintptrARB"
+                || type == "GLsizeiptrARB")
             {
                 return "int";
             }
-            else if (type.Contains("*") || type == "GLsync" || type == "GLintptr" || type == "GLDEBUGPROC")
+            if (type.Contains("*") || type == "GLsync" || type == "GLintptr" || type == "GLDEBUGPROC")
             {
                 return "IntPtr";
             }
-            else if (type == "GLfloat" || type == "GLclampf")
+            if (type == "GLfloat" || type == "GLclampf")
             {
                 return "float";
             }
-            else if (type == "GLdouble")
+            if (type == "GLdouble")
             {
                 return "double";
             }
-            else if (type == "GLubyte")
+            if (type == "GLubyte")
             {
                 return "byte";
             }
-            else if (type == "GLbyte")
+            if (type == "GLbyte")
             {
                 return "sbyte";
             }
-            else if (type == "GLushort")
+            if (type == "GLushort")
             {
                 return "ushort";
             }
-            else if (type == "GLshort")
+            if (type == "GLshort")
             {
                 return "short";
             }
-            else if (type == "GLuint64")
+            if (type == "GLuint64")
             {
                 return "ulong";
             }
@@ -363,7 +347,7 @@ namespace GLCSGen
 
         private static bool IsUint(string value)
         {
-            bool isHex = false;
+            var isHex = false;
 
             if (value.StartsWith("0x"))
             {
@@ -381,10 +365,7 @@ namespace GLCSGen
             {
                 return uint.TryParse(value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
             }
-            else
-            {
-                return uint.TryParse(value, out result);
-            }
+            return uint.TryParse(value, out result);
         }
     }
 }
