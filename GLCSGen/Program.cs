@@ -1,4 +1,6 @@
-﻿using CommandLine;
+﻿using System.Xml.Linq;
+using CommandLine;
+using GLCSGen.Spec;
 
 namespace GLCSGen
 {
@@ -11,6 +13,8 @@ namespace GLCSGen
             {
                 return;
             }
+
+            var spec = new GlSpec(XDocument.Load(options.GlSpecFile));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace GLCSGenTests
     public class SpecTests
     {
         [Test]
-        public void Commands_ReturnsParsedCommandInfo()
+        public void ParsesCommandInformation()
         {
             var doc = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <registry>
@@ -39,7 +39,7 @@ namespace GLCSGenTests
         }
 
         [Test]
-        public void Enumerations_ReturnsCorrectEnumValues()
+        public void ParsesEnumNamesAndValues()
         {
             var doc = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <registry>
@@ -53,9 +53,43 @@ namespace GLCSGenTests
 
             Assert.That(glSpec.Enumerations, Has.Count.EqualTo(2));
             Assert.That(glSpec.Enumerations[0].Name, Is.EqualTo("GL_CURRENT_BIT"));
-            Assert.That(glSpec.Enumerations[0].Value, Is.EqualTo(0x00000001));
+            Assert.That(glSpec.Enumerations[0].UInt32Value, Is.EqualTo(0x00000001));
             Assert.That(glSpec.Enumerations[1].Name, Is.EqualTo("GL_POINT_BIT"));
-            Assert.That(glSpec.Enumerations[1].Value, Is.EqualTo(0x00000002));
+            Assert.That(glSpec.Enumerations[1].UInt32Value, Is.EqualTo(0x00000002));
+        }
+
+        [Test]
+        public void ParsesEnumsWithNegativeValues()
+        {
+            var doc = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<registry>
+    <enums namespace=""GL"" group=""AttribMask"" type=""bitmask"">
+        <enum value=""-2"" name=""GL_CURRENT_BIT""/>
+    </enums>
+</registry>");
+
+            var glSpec = new GlSpec(doc);
+
+            Assert.That(glSpec.Enumerations, Has.Count.EqualTo(1));
+            Assert.That(glSpec.Enumerations[0].Name, Is.EqualTo("GL_CURRENT_BIT"));
+            Assert.That(glSpec.Enumerations[0].Int32Value, Is.EqualTo(-2));
+        }
+
+        [Test]
+        public void ParsesEnumsWithLongValues()
+        {
+            var doc = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<registry>
+    <enums namespace=""GL"" group=""AttribMask"" type=""bitmask"">
+        <enum value=""0xFFFFFFFFFFFFFFFF"" name=""GL_CURRENT_BIT""/>
+    </enums>
+</registry>");
+
+            var glSpec = new GlSpec(doc);
+
+            Assert.That(glSpec.Enumerations, Has.Count.EqualTo(1));
+            Assert.That(glSpec.Enumerations[0].Name, Is.EqualTo("GL_CURRENT_BIT"));
+            Assert.That(glSpec.Enumerations[0].UInt64Value, Is.EqualTo(0xFFFFFFFFFFFFFFFF));
         }
     }
 }
