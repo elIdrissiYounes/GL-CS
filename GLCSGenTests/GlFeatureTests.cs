@@ -10,6 +10,60 @@ namespace GLCSGenTests
     public class GlFeatureTests
     {
         [Test]
+        public void CanRemoveCommandsFromInheritedFeature()
+        {
+            Assert.Fail("Not implemented yet");
+
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <command name=""glDrawArrays""/>
+                    </require>
+                    <remove>
+                        <command name=""glBlendColor""/>
+                    </remove>
+                </feature>");
+        }
+
+        [Test]
+        public void CanRemoveEnumsFromInheritedFeature()
+        {
+            Assert.Fail("Not implemented yet");
+
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <enum name=""GL_CURRENT_BIT""/>
+                    </require>
+                    <remove>
+                        <enum name=""GL_POINT_BIT""/>
+                    </remove>
+                </feature>");
+        }
+
+        [Test]
+        public void SupportsMultipleRequireElements()
+        {
+            Assert.Fail("Not implemented yet");
+
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <command name=""glDrawArrays""/>
+                    </require>
+                    <require>
+                        <command name=""glBlendColor""/>
+                    </require>
+                </feature>");
+        }
+
+        [Test]
+        public void SupportsMultipleRemoveElements()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [Test]
         public void IncludesCommands()
         {
             var element = XElement.Parse(@"
@@ -24,6 +78,12 @@ namespace GLCSGenTests
             var feature = GlFeature.Parse(element, Enumerable.Empty<IGlEnumeration>(), commands);
             Assert.That(feature.Commands, Has.Count.EqualTo(1));
             Assert.That(feature.Commands[0].Name, Is.EqualTo("glDrawArrays"));
+        }
+
+        [Test]
+        public void IncludesCommandsFromInheritedFeature()
+        {
+            Assert.Fail("Not implemented yet");
         }
 
         [Test]
@@ -42,6 +102,12 @@ namespace GLCSGenTests
             Assert.That(feature.Enumerations, Has.Count.EqualTo(1));
             Assert.That(feature.Enumerations[0].Name, Is.EqualTo("GL_DEPTH_BUFFER_BIT"));
             Assert.That(feature.Enumerations[0].UInt32Value, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void IncludesEnumerationsFromInheritedFeature()
+        {
+            Assert.Fail("Not implemented yet");
         }
 
         [Test]
