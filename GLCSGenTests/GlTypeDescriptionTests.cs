@@ -7,28 +7,22 @@ namespace GLCSGenTests
     public class GlTypeDescriptionTests
     {
         [TestCase("void", GlTypeModifier.None)]
-
         [TestCase("void const", GlTypeModifier.Const)]
         [TestCase("const void", GlTypeModifier.Const)]
-
         [TestCase("void*", GlTypeModifier.Pointer)]
         [TestCase("void *", GlTypeModifier.Pointer)]
-
         [TestCase("void*const", GlTypeModifier.ConstPointer)]
         [TestCase("void *const", GlTypeModifier.ConstPointer)]
         [TestCase("void* const", GlTypeModifier.ConstPointer)]
         [TestCase("void * const", GlTypeModifier.ConstPointer)]
-
         [TestCase("void const*", GlTypeModifier.PointerToConst)]
         [TestCase("void const *", GlTypeModifier.PointerToConst)]
         [TestCase("const void*", GlTypeModifier.PointerToConst)]
         [TestCase("const void *", GlTypeModifier.PointerToConst)]
-
         [TestCase("void**", GlTypeModifier.PointerToPointer)]
         [TestCase("void **", GlTypeModifier.PointerToPointer)]
         [TestCase("void* *", GlTypeModifier.PointerToPointer)]
         [TestCase("void * *", GlTypeModifier.PointerToPointer)]
-
         [TestCase("void const**", GlTypeModifier.PointerToPointerToConst)]
         [TestCase("void const **", GlTypeModifier.PointerToPointerToConst)]
         [TestCase("void const* *", GlTypeModifier.PointerToPointerToConst)]
@@ -37,7 +31,6 @@ namespace GLCSGenTests
         [TestCase("const void **", GlTypeModifier.PointerToPointerToConst)]
         [TestCase("const void* *", GlTypeModifier.PointerToPointerToConst)]
         [TestCase("const void * *", GlTypeModifier.PointerToPointerToConst)]
-
         [TestCase("void*const*", GlTypeModifier.PointerToConstPointer)]
         [TestCase("void *const*", GlTypeModifier.PointerToConstPointer)]
         [TestCase("void* const*", GlTypeModifier.PointerToConstPointer)]
@@ -45,7 +38,6 @@ namespace GLCSGenTests
         [TestCase("void * const*", GlTypeModifier.PointerToConstPointer)]
         [TestCase("void *const *", GlTypeModifier.PointerToConstPointer)]
         [TestCase("void * const *", GlTypeModifier.PointerToConstPointer)]
-
         [TestCase("void**const", GlTypeModifier.ConstPointerToPointer)]
         [TestCase("void **const", GlTypeModifier.ConstPointerToPointer)]
         [TestCase("void* *const", GlTypeModifier.ConstPointerToPointer)]
@@ -53,7 +45,6 @@ namespace GLCSGenTests
         [TestCase("void * *const", GlTypeModifier.ConstPointerToPointer)]
         [TestCase("void ** const", GlTypeModifier.ConstPointerToPointer)]
         [TestCase("void * * const", GlTypeModifier.ConstPointerToPointer)]
-
         [TestCase("void*const*const", GlTypeModifier.ConstPointerToConstPointer)]
         [TestCase("void *const*const", GlTypeModifier.ConstPointerToConstPointer)]
         [TestCase("void* const*const", GlTypeModifier.ConstPointerToConstPointer)]
@@ -65,7 +56,6 @@ namespace GLCSGenTests
         [TestCase("void * const *const", GlTypeModifier.ConstPointerToConstPointer)]
         [TestCase("void * const* const", GlTypeModifier.ConstPointerToConstPointer)]
         [TestCase("void * const * const", GlTypeModifier.ConstPointerToConstPointer)]
-
         [TestCase("void const*const*", GlTypeModifier.PointerToConstPointerToConst)]
         [TestCase("void const *const*", GlTypeModifier.PointerToConstPointerToConst)]
         [TestCase("void const* const*", GlTypeModifier.PointerToConstPointerToConst)]

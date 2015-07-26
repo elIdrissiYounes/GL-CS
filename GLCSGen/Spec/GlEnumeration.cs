@@ -34,7 +34,7 @@ namespace GLCSGen.Spec
             var name = enumNode.Attribute("name").Value;
             var value = enumNode.Attribute("value").Value;
 
-            NumberStyles parseStyle = NumberStyles.Any;
+            var parseStyle = NumberStyles.Any;
             if (value.StartsWith("0x"))
             {
                 value = value.Substring(2);
@@ -42,19 +42,19 @@ namespace GLCSGen.Spec
             }
 
             uint uintValue;
-            if (UInt32.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out uintValue))
+            if (uint.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out uintValue))
             {
                 return new GlEnumeration(name, uintValue);
             }
 
             ulong ulongValue;
-            if (UInt64.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out ulongValue))
+            if (ulong.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out ulongValue))
             {
                 return new GlEnumeration(name, ulongValue);
             }
 
             int intValue;
-            if (Int32.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out intValue))
+            if (int.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out intValue))
             {
                 return new GlEnumeration(name, intValue);
             }

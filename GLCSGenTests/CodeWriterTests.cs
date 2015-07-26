@@ -9,10 +9,6 @@ namespace GLCSGenTests
     [TestFixture]
     public class CodeWriterTests
     {
-        private StringBuilder _stringBuilder;
-        private StringWriter _stringWriter;
-        private CodeWriter _codeWriter;
-
         [SetUp]
         public void SetUp()
         {
@@ -21,10 +17,22 @@ namespace GLCSGenTests
             _codeWriter = new CodeWriter(_stringWriter);
         }
 
+        private StringBuilder _stringBuilder;
+        private StringWriter _stringWriter;
+        private CodeWriter _codeWriter;
+
         [Test]
-        public void TabCount_DefaultsToZero()
+        public void DedentAndWriteCloseBrace_ProperlyDecrementsTabCountAndInsertsBrace()
         {
+            _codeWriter.TabCount = 2;
+
+            _codeWriter.DedentAndWriteCloseBrace();
+            Assert.That(_codeWriter.TabCount, Is.EqualTo(1));
+            Assert.That(_stringBuilder.ToString(), Is.EqualTo("    }" + Environment.NewLine));
+
+            _codeWriter.DedentAndWriteCloseBrace();
             Assert.That(_codeWriter.TabCount, Is.EqualTo(0));
+            Assert.That(_stringBuilder.ToString(), Is.EqualTo("    }" + Environment.NewLine + "}" + Environment.NewLine));
         }
 
         [Test]
@@ -35,10 +43,9 @@ namespace GLCSGenTests
         }
 
         [Test]
-        public void WriteLine_WritesAProperNewLine()
+        public void TabCount_DefaultsToZero()
         {
-            _codeWriter.WriteLine();
-            Assert.That(_stringBuilder.ToString(), Is.EqualTo(Environment.NewLine));
+            Assert.That(_codeWriter.TabCount, Is.EqualTo(0));
         }
 
         [Test]
@@ -51,6 +58,13 @@ namespace GLCSGenTests
         }
 
         [Test]
+        public void WriteLine_WritesAProperNewLine()
+        {
+            _codeWriter.WriteLine();
+            Assert.That(_stringBuilder.ToString(), Is.EqualTo(Environment.NewLine));
+        }
+
+        [Test]
         public void WriteOpenBraceAndIndent_ProperlyInsertsBraceAndIncrementsTabCount()
         {
             _codeWriter.WriteOpenBraceAndIndent();
@@ -60,20 +74,6 @@ namespace GLCSGenTests
             _codeWriter.WriteOpenBraceAndIndent();
             Assert.That(_codeWriter.TabCount, Is.EqualTo(2));
             Assert.That(_stringBuilder.ToString(), Is.EqualTo("{" + Environment.NewLine + "    {" + Environment.NewLine));
-        }
-
-        [Test]
-        public void DedentAndWriteCloseBrace_ProperlyDecrementsTabCountAndInsertsBrace()
-        {
-            _codeWriter.TabCount = 2;
-            
-            _codeWriter.DedentAndWriteCloseBrace();
-            Assert.That(_codeWriter.TabCount, Is.EqualTo(1));
-            Assert.That(_stringBuilder.ToString(), Is.EqualTo("    }" + Environment.NewLine));
-
-            _codeWriter.DedentAndWriteCloseBrace();
-            Assert.That(_codeWriter.TabCount, Is.EqualTo(0));
-            Assert.That(_stringBuilder.ToString(), Is.EqualTo("    }" + Environment.NewLine + "}" + Environment.NewLine));
         }
     }
 }

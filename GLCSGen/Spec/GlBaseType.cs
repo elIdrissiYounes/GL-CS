@@ -31,6 +31,6 @@ namespace GLCSGen.Spec
         UInt64,
         UShort,
         VdpauSurface,
-        Void,
+        Void
     }
 }
