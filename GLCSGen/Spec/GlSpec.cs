@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -10,9 +11,15 @@ namespace GLCSGen.Spec
         {
             var allEnums = ParseEnums(doc);
             var allCommands = ParseCommands(doc);
+            Features = ParseFeatures(doc, allEnums, allCommands);
         }
 
         public IReadOnlyList<IGlFeature> Features { get; }
+
+        private static IReadOnlyList<IGlFeature> ParseFeatures(XDocument doc, IEnumerable<IGlEnumeration> allEnums, IEnumerable<IGlCommand> allCommands)
+        {
+            return doc.Root?.Elements("feature").Select(featureNode => GlFeature.Parse(featureNode, allEnums, allCommands)).ToList();
+        }
 
         private static IEnumerable<IGlCommand> ParseCommands(XDocument doc)
         {
