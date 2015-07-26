@@ -36,8 +36,25 @@ namespace GLCSGen.Spec
             var name = element.Attribute("name").Value;
             var version = Version.Parse(element.Attribute("number").Value);
 
-            var featureEnumerations = Enumerable.Empty<IGlEnumeration>();
-            var featureCommands = Enumerable.Empty<IGlCommand>();
+            IEnumerable<IGlEnumeration> featureEnumerations;
+            IEnumerable<IGlCommand> featureCommands;
+
+            var requireElement = element.Element("require");
+            if (requireElement != null)
+            {
+                featureEnumerations = requireElement.Elements("enum")
+                                                    .Select(e => e.Attribute("name").Value)
+                                                    .Select(n => enumerations.First(e => e.Name == n));
+
+                featureCommands = requireElement.Elements("command")
+                                                .Select(e => e.Attribute("name").Value)
+                                                .Select(n => commands.First(c => c.Name == n));
+            }
+            else
+            {
+                featureEnumerations = Enumerable.Empty<IGlEnumeration>();
+                featureCommands = Enumerable.Empty<IGlCommand>();
+            }
 
             return new GlFeature(api, name, version, featureEnumerations, featureCommands);
         }

@@ -10,6 +10,41 @@ namespace GLCSGenTests
     public class GlFeatureTests
     {
         [Test]
+        public void IncludesCommands()
+        {
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <command name=""glDrawArrays""/>
+                    </require>
+                </feature>");
+
+            var commands = new[] {new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
+
+            var feature = GlFeature.Parse(element, Enumerable.Empty<IGlEnumeration>(), commands);
+            Assert.That(feature.Commands, Has.Count.EqualTo(1));
+            Assert.That(feature.Commands[0].Name, Is.EqualTo("glDrawArrays"));
+        }
+
+        [Test]
+        public void IncludesEnumerations()
+        {
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <enum name=""GL_DEPTH_BUFFER_BIT""/>
+                    </require>
+                </feature>");
+
+            var enumerations = new[] {new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u)};
+
+            var feature = GlFeature.Parse(element, enumerations, Enumerable.Empty<IGlCommand>());
+            Assert.That(feature.Enumerations, Has.Count.EqualTo(1));
+            Assert.That(feature.Enumerations[0].Name, Is.EqualTo("GL_DEPTH_BUFFER_BIT"));
+            Assert.That(feature.Enumerations[0].UInt32Value, Is.EqualTo(0));
+        }
+
+        [Test]
         public void ParsesGlApi()
         {
             var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
@@ -34,19 +69,19 @@ namespace GLCSGenTests
         }
 
         [Test]
-        public void ReadsName()
-        {
-            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            var feature = GlFeature.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            Assert.That(feature.Name, Is.EqualTo("GL_VERSION_1_1"));
-        }
-
-        [Test]
         public void ParsesVersion()
         {
             var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
             var feature = GlFeature.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
             Assert.That(feature.Version, Is.EqualTo(new Version(1, 1)));
+        }
+
+        [Test]
+        public void ReadsName()
+        {
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            var feature = GlFeature.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
+            Assert.That(feature.Name, Is.EqualTo("GL_VERSION_1_1"));
         }
     }
 }
