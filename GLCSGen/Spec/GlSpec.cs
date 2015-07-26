@@ -8,14 +8,13 @@ namespace GLCSGen.Spec
     {
         public GlSpec(XDocument doc)
         {
-            Enumerations = ParseEnums(doc);
-            Commands = ParseCommands(doc);
+            var allEnums = ParseEnums(doc);
+            var allCommands = ParseCommands(doc);
         }
 
-        public IReadOnlyList<IGlEnumeration> Enumerations { get; }
-        public IReadOnlyList<IGlCommand> Commands { get; }
+        public IReadOnlyList<IGlFeature> Features { get; }
 
-        private static IReadOnlyList<IGlCommand> ParseCommands(XDocument doc)
+        private static IEnumerable<IGlCommand> ParseCommands(XDocument doc)
         {
             var commands = new List<IGlCommand>();
 
@@ -27,7 +26,7 @@ namespace GLCSGen.Spec
             return commands;
         }
 
-        private static IReadOnlyList<IGlEnumeration> ParseEnums(XDocument doc)
+        private static IEnumerable<IGlEnumeration> ParseEnums(XDocument doc)
         {
             var enumerations = new List<IGlEnumeration>();
 

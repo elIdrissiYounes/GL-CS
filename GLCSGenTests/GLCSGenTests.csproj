@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="CodeWriterTests.cs" />
     <Compile Include="GlCommandTests.cs" />
+    <Compile Include="GlFeatureTests.cs" />
     <Compile Include="GlTypeDescriptionTests.cs" />
     <Compile Include="GlParametersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
