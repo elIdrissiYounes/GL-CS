@@ -47,18 +47,20 @@
   <ItemGroup>
     <Compile Include="CodeWriter.cs" />
     <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="Spec\GlBaseType.cs" />
     <Compile Include="Spec\GlCommand.cs" />
     <Compile Include="Spec\GlEnumeration.cs" />
     <Compile Include="Spec\GlParameter.cs" />
     <Compile Include="Spec\GlSpec.cs" />
-    <Compile Include="Spec\GlType.cs" />
-    <Compile Include="Spec\GlTypeHelpers.cs" />
+    <Compile Include="Spec\GlTypeDescription.cs" />
+    <Compile Include="Spec\GlTypeModifier.cs" />
     <Compile Include="Spec\IGlCommand.cs" />
     <Compile Include="Spec\IGlEnumeration.cs" />
     <Compile Include="Spec\IGlParameter.cs" />
     <Compile Include="Spec\IGlSpec.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Spec\IGlTypeDescription.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

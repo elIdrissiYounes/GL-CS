@@ -2,7 +2,7 @@ namespace GLCSGen.Spec
 {
     public interface IGlParameter
     {
-        GlType Type { get; }
+        IGlTypeDescription Type { get; }
         string Group { get; }
         string Name { get; }
     }

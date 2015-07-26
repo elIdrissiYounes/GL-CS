@@ -6,14 +6,14 @@ namespace GLCSGen.Spec
 {
     public class GlParameter : IGlParameter
     {
-        public GlParameter(GlType type, string group, string name)
+        public GlParameter(IGlTypeDescription type, string group, string name)
         {
             Type = type;
             Group = group;
             Name = name;
         }
 
-        public GlType Type { get; }
+        public IGlTypeDescription Type { get; }
         public string Group { get; }
         public string Name { get; }
 
@@ -27,7 +27,7 @@ namespace GLCSGen.Spec
                                 .Select(t => t.StartsWith("GL") ? t.Substring(2) : t)
                                 .Aggregate("", (a, b) => a + b);
 
-            return new GlParameter(GlTypeHelpers.Parse(type), group, paramName);
+            return new GlParameter(GlTypeDescription.Parse(type), group, paramName);
         }
     }
 }

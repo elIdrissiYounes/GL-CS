@@ -5,7 +5,7 @@ namespace GLCSGen.Spec
     public interface IGlCommand
     {
         string Name { get; }
-        GlType ReturnType { get; set; }
+        IGlTypeDescription ReturnType { get; set; }
         IReadOnlyList<IGlParameter> Parameters { get; set; }
     }
 }

@@ -1,0 +1,36 @@
+namespace GLCSGen.Spec
+{
+    public enum GlBaseType
+    {
+        Bitfield,
+        Boolean,
+        Byte,
+        Char,
+        ClampD,
+        ClampF,
+        ClampX,
+        ClContext,
+        ClEvent,
+        DebugProc,
+        Double,
+        EglImageOes,
+        Enum,
+        Fixed,
+        Float,
+        Half,
+        Handle,
+        Int,
+        Int64,
+        IntPtr,
+        Short,
+        SizeI,
+        SizeIPtr,
+        Sync,
+        UByte,
+        UInt,
+        UInt64,
+        UShort,
+        VdpauSurface,
+        Void,
+    }
+}

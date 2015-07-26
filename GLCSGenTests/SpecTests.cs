@@ -28,12 +28,15 @@ namespace GLCSGenTests
 
             var cmd = glSpec.Commands[0];
             Assert.That(cmd.Name, Is.EqualTo("glAccum"));
-            Assert.That(cmd.ReturnType, Is.EqualTo(GlType.Void));
+            Assert.That(cmd.ReturnType.BaseType, Is.EqualTo(GlBaseType.Void));
+            Assert.That(cmd.ReturnType.Modifier, Is.EqualTo(GlTypeModifier.None));
             Assert.That(cmd.Parameters, Has.Count.EqualTo(2));
-            Assert.That(cmd.Parameters[0].Type, Is.EqualTo(GlType.Enum));
+            Assert.That(cmd.Parameters[0].Type.BaseType, Is.EqualTo(GlBaseType.Enum));
+            Assert.That(cmd.Parameters[0].Type.Modifier, Is.EqualTo(GlTypeModifier.None));
             Assert.That(cmd.Parameters[0].Group, Is.EqualTo("AccumOp"));
             Assert.That(cmd.Parameters[0].Name, Is.EqualTo("op"));
-            Assert.That(cmd.Parameters[1].Type, Is.EqualTo(GlType.Float));
+            Assert.That(cmd.Parameters[1].Type.BaseType, Is.EqualTo(GlBaseType.Float));
+            Assert.That(cmd.Parameters[1].Type.Modifier, Is.EqualTo(GlTypeModifier.None));
             Assert.That(cmd.Parameters[1].Group, Is.EqualTo("CoordF"));
             Assert.That(cmd.Parameters[1].Name, Is.EqualTo("value"));
         }
