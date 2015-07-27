@@ -4,6 +4,6 @@ namespace GLCSGen.Spec
 {
     public interface IGlSpec
     {
-        IReadOnlyList<IGlFeature> Features { get; }
+        IReadOnlyList<IGlApi> Features { get; }
     }
 }

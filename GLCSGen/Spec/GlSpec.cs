@@ -13,26 +13,26 @@ namespace GLCSGen.Spec
             Features = ParseFeatures(doc, allEnums, allCommands);
         }
 
-        public IReadOnlyList<IGlFeature> Features { get; }
+        public IReadOnlyList<IGlApi> Features { get; }
 
-        private static IReadOnlyList<IGlFeature> ParseFeatures(XDocument doc, IReadOnlyList<IGlEnumeration> allEnums, IReadOnlyList<IGlCommand> allCommands)
+        private static IReadOnlyList<IGlApi> ParseFeatures(XDocument doc, IReadOnlyList<IGlEnumeration> allEnums, IReadOnlyList<IGlCommand> allCommands)
         {
-            var features = new List<IGlFeature>();
+            var features = new List<IGlApi>();
 
             var lastFeatureApi = string.Empty;
-            IGlFeature lastFeature = null;
+            IGlApi lastApi = null;
 
             foreach (var featureNode in doc.Root.Elements("feature"))
             {
                 if (featureNode.Attribute("api").Value != lastFeatureApi)
                 {
                     lastFeatureApi = featureNode.Attribute("api").Value;
-                    lastFeature = null;
+                    lastApi = null;
                 }
 
-                var feature = GlFeature.Parse(featureNode, allEnums, allCommands, lastFeature);
+                var feature = GlApi.Parse(featureNode, allEnums, allCommands, lastApi);
                 features.Add(feature);
-                lastFeature = feature;
+                lastApi = feature;
             }
 
             return features;

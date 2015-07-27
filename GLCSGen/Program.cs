@@ -29,10 +29,10 @@ namespace GLCSGen
             }
         }
 
-        private static void WriteFeatureToFile(IGlFeature feature, string outputPath)
+        private static void WriteFeatureToFile(IGlApi api, string outputPath)
         {
-            var version = feature.Version.ToString().Replace(".", "");
-            var filePath = Path.Combine(outputPath, $"{feature.Api}{version}.cs");
+            var version = api.Version.ToString().Replace(".", "");
+            var filePath = Path.Combine(outputPath, $"{api.ApiFamily}{version}.cs");
             using (var streamWriter = new StreamWriter(filePath))
             {
                 var code = new CodeWriter(streamWriter);
@@ -42,10 +42,10 @@ namespace GLCSGen
                 code.WriteLine("namespace OpenGL");
                 code.WriteOpenBraceAndIndent();
 
-                code.WriteLine($"public static class {feature.Api}{version}");
+                code.WriteLine($"public static class {api.ApiFamily}{version}");
                 code.WriteOpenBraceAndIndent();
 
-                foreach (var enumeration in feature.Enumerations)
+                foreach (var enumeration in api.Enumerations)
                 {
                     WriteEnumeration(code, enumeration);
                 }
