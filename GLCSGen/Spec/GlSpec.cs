@@ -18,21 +18,9 @@ namespace GLCSGen.Spec
         private static IReadOnlyList<IGlApi> ParseFeatures(XDocument doc, IReadOnlyList<IGlEnumeration> allEnums, IReadOnlyList<IGlCommand> allCommands)
         {
             var features = new List<IGlApi>();
-
-            var lastFeatureApi = string.Empty;
-            IGlApi lastApi = null;
-
+            
             foreach (var featureNode in doc.Root.Elements("feature"))
             {
-                if (featureNode.Attribute("api").Value != lastFeatureApi)
-                {
-                    lastFeatureApi = featureNode.Attribute("api").Value;
-                    lastApi = null;
-                }
-
-                var feature = GlApi.Parse(featureNode, allEnums, allCommands, lastApi);
-                features.Add(feature);
-                lastApi = feature;
             }
 
             return features;

@@ -52,6 +52,7 @@
     <Compile Include="Spec\GlCommand.cs" />
     <Compile Include="Spec\GlEnumeration.cs" />
     <Compile Include="Spec\GlApi.cs" />
+    <Compile Include="Spec\GlFeatureNotOpenGl1Exception.cs" />
     <Compile Include="Spec\GlInvalidParentFeatureException.cs" />
     <Compile Include="Spec\GlParameter.cs" />
     <Compile Include="Spec\GlProfileType.cs" />

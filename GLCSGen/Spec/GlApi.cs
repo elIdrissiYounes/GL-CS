@@ -13,63 +13,69 @@ namespace GLCSGen.Spec
             Version version,
             IEnumerable<IGlEnumeration> enumerations,
             IEnumerable<IGlCommand> commands)
-            : this(apiFamily, profileType, version, enumerations, commands, null)
-        {}
-
-        public GlApi(
-            GlApiFamily apiFamily,
-            GlProfileType profileType,
-            Version version,
-            IEnumerable<IGlEnumeration> enumerations,
-            IEnumerable<IGlCommand> commands,
-            IGlApi parentApi)
-            : this(apiFamily, profileType, version, enumerations, commands, parentApi, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>())
-        {}
-
-        public GlApi(
-            GlApiFamily apiFamily,
-            GlProfileType profileType,
-            Version version,
-            IEnumerable<IGlEnumeration> enumerations,
-            IEnumerable<IGlCommand> commands,
-            IGlApi parentApi,
-            IEnumerable<IGlEnumeration> enumerationsToRemove,
-            IEnumerable<IGlCommand> commandsToRemove)
         {
             ApiFamily = apiFamily;
             ProfileType = profileType;
             Version = version;
-
-            if (parentApi != null)
-            {
-                if (version.CompareTo(parentApi.Version) <= 0)
-                {
-                    throw new GlInvalidParentFeatureException();
-                }
-
-                enumerations = parentApi.Enumerations.Union(enumerations).Except(enumerationsToRemove);
-                commands = parentApi.Commands.Union(commands).Except(commandsToRemove);
-            }
-
             Enumerations = new List<IGlEnumeration>(enumerations);
             Commands = new List<IGlCommand>(commands);
         }
 
         public GlApiFamily ApiFamily { get; }
         public GlProfileType ProfileType { get; }
-        public string Name { get; }
         public Version Version { get; }
         public IReadOnlyList<IGlEnumeration> Enumerations { get; }
         public IReadOnlyList<IGlCommand> Commands { get; }
 
+        public static IGlApi ParseOpenGl1(
+            XElement element,
+            IReadOnlyDictionary<string, IEnumerable<IGlEnumeration>> allEnumerationsByGroup,
+            IEnumerable<IGlCommand> allCommands)
+        {
+            if (element.Attribute("api").Value != "gl" ||
+                element.Attribute("number").Value != "1.0")
+            {
+                throw new GlFeatureNotOpenGl1Exception("ParseOpenGl1 can only parse the 1.0 feature of OpenGL");
+            }
+
+            var commandsToAdd = new List<IGlCommand>();
+            foreach (var requireElement in element.Elements("require"))
+            {
+                commandsToAdd.AddRange(requireElement.Elements("command")
+                                                     .Select(e => e.Attribute("name").Value)
+                                                     .Select(n => allCommands.First(c => c.Name == n)));
+            }
+
+            var enumerationsToAdd = new List<IGlEnumeration>();
+            foreach (var parameter in from command in commandsToAdd
+                                      from parameter in command.Parameters
+                                      where parameter.Type.BaseType == GlBaseType.Enum && !string.IsNullOrEmpty(parameter.Group)
+                                      select parameter)
+            {
+                enumerationsToAdd.AddRange(allEnumerationsByGroup[parameter.Group]);
+            }
+
+            return new GlApi(GlApiFamily.Gl, GlProfileType.None, new Version(1, 0), enumerationsToAdd, commandsToAdd);
+        }
+
         public static IGlApi Parse(
             XElement element,
-            IEnumerable<IGlEnumeration> enumerations,
-            IEnumerable<IGlCommand> commands,
+            IEnumerable<IGlEnumeration> allEnumerations,
+            IEnumerable<IGlCommand> allCommands,
+            IGlApi parentApi,
+            GlProfileType profile)
+        {
+            return null;
+        }
+
+        private static IGlApi Parse(
+            XElement element,
+            IEnumerable<IGlEnumeration> allEnumerations,
+            IEnumerable<IGlCommand> allCommands,
             IGlApi parentApi = null)
         {
-            var api = (GlApiFamily)Enum.Parse(typeof(GlApiFamily), element.Attribute("api").Value, true);
-            var name = element.Attribute("name").Value;
+            var apiFamily = element.Attribute("api").Value == "gl" ? GlApiFamily.Gl : GlApiFamily.GlEs;
+
             var version = Version.Parse(element.Attribute("number").Value);
 
             var enumerationsToAdd = new List<IGlEnumeration>();
@@ -82,25 +88,25 @@ namespace GLCSGen.Spec
             {
                 enumerationsToAdd.AddRange(requireElement.Elements("enum")
                                                          .Select(e => e.Attribute("name").Value)
-                                                         .Select(n => enumerations.First(e => e.Name == n)));
+                                                         .Select(n => allEnumerations.First(e => e.Name == n)));
 
                 commandsToAdd.AddRange(requireElement.Elements("command")
                                                      .Select(e => e.Attribute("name").Value)
-                                                     .Select(n => commands.First(c => c.Name == n)));
+                                                     .Select(n => allCommands.First(c => c.Name == n)));
             }
 
             foreach (var removeElement in element.Elements("remove"))
             {
                 enumerationsToRemove.AddRange(removeElement.Elements("enum")
                                                            .Select(e => e.Attribute("name").Value)
-                                                           .Select(n => enumerations.First(e => e.Name == n)));
+                                                           .Select(n => allEnumerations.First(e => e.Name == n)));
 
                 commandsToRemove.AddRange(removeElement.Elements("command")
                                                        .Select(e => e.Attribute("name").Value)
-                                                       .Select(n => commands.First(c => c.Name == n)));
+                                                       .Select(n => allCommands.First(c => c.Name == n)));
             }
 
-            return new GlApi(api, GlProfileType.Compatibility, version, enumerationsToAdd, commandsToAdd, parentApi, enumerationsToRemove, commandsToRemove);
+            return new GlApi(apiFamily, GlProfileType.Compatibility, version, enumerationsToAdd, commandsToAdd);
         }
     }
 }
