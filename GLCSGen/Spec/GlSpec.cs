@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -16,12 +15,30 @@ namespace GLCSGen.Spec
 
         public IReadOnlyList<IGlFeature> Features { get; }
 
-        private static IReadOnlyList<IGlFeature> ParseFeatures(XDocument doc, IEnumerable<IGlEnumeration> allEnums, IEnumerable<IGlCommand> allCommands)
+        private static IReadOnlyList<IGlFeature> ParseFeatures(XDocument doc, IReadOnlyList<IGlEnumeration> allEnums, IReadOnlyList<IGlCommand> allCommands)
         {
-            return doc.Root?.Elements("feature").Select(featureNode => GlFeature.Parse(featureNode, allEnums, allCommands)).ToList();
+            var features = new List<IGlFeature>();
+
+            var lastFeatureApi = string.Empty;
+            IGlFeature lastFeature = null;
+
+            foreach (var featureNode in doc.Root.Elements("feature"))
+            {
+                if (featureNode.Attribute("api").Value != lastFeatureApi)
+                {
+                    lastFeatureApi = featureNode.Attribute("api").Value;
+                    lastFeature = null;
+                }
+
+                var feature = GlFeature.Parse(featureNode, allEnums, allCommands, lastFeature);
+                features.Add(feature);
+                lastFeature = feature;
+            }
+
+            return features;
         }
 
-        private static IEnumerable<IGlCommand> ParseCommands(XDocument doc)
+        private static IReadOnlyList<IGlCommand> ParseCommands(XDocument doc)
         {
             var commands = new List<IGlCommand>();
 
@@ -33,7 +50,7 @@ namespace GLCSGen.Spec
             return commands;
         }
 
-        private static IEnumerable<IGlEnumeration> ParseEnums(XDocument doc)
+        private static IReadOnlyList<IGlEnumeration> ParseEnums(XDocument doc)
         {
             var enumerations = new List<IGlEnumeration>();
 
