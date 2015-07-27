@@ -158,6 +158,24 @@ namespace GLCSGenTests
         }
 
         [Test]
+        public void Parse_ParsesGlEs1Api()
+        {
+            Assert.Fail();
+            //var element = XElement.Parse(@"<feature api=""gles1"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
+            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.GlEs));
+        }
+
+        [Test]
+        public void Parse_ParsesGlEs2Api()
+        {
+            Assert.Fail();
+            //var element = XElement.Parse(@"<feature api=""gles2"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
+            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.GlEs));
+        }
+
+        [Test]
         public void Parse_ParsesVersion()
         {
             Assert.Fail();
@@ -259,6 +277,54 @@ namespace GLCSGenTests
         }
 
         [Test]
+        public void ParseOpenGL1_IncludesCommands()
+        {
+            var allCommands = new[]
+            {
+                new GlCommand("glAccum", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
+            };
+
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_0"" number=""1.0"">
+                    <require>
+                        <command name=""glAccum""/>
+                    </require>
+                </feature>");
+
+            var api = GlApi.ParseOpenGl1(element, new Dictionary<string, IEnumerable<IGlEnumeration>>(), allCommands);
+            Assert.That(api.Commands, Has.Count.EqualTo(1));
+            Assert.That(api.Commands[0], Is.SameAs(allCommands[0]));
+        }
+
+        [Test]
+        public void ParseOpenGL1_IncludesEnumsUsingCommandParameterGroups()
+        {
+            var enumerationsByGroup = new Dictionary<string, IEnumerable<IGlEnumeration>>
+            {
+                ["AccumOp"] = new[] {new GlEnumeration("Test1", 0u), new GlEnumeration("Test2", 1u)},
+                ["OtherEnum"] = new[] {new GlEnumeration("Test3", 2u), new GlEnumeration("Test4", 3u)}
+            };
+
+            var allCommands = new[]
+            {
+                new GlCommand("glAccum",
+                              new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
+                              new[] {new GlParameter(new GlTypeDescription(GlBaseType.Enum, GlTypeModifier.None), "AccumOp", "op")})
+            };
+
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_0"" number=""1.0"">
+                    <require>
+                        <command name=""glAccum""/>
+                    </require>
+                </feature>");
+
+            var api = GlApi.ParseOpenGl1(element, enumerationsByGroup, allCommands);
+            Assert.That(api.Enumerations, Has.Count.EqualTo(2));
+            Assert.That(api.Enumerations, Is.EquivalentTo(enumerationsByGroup["AccumOp"]));
+        }
+
+        [Test]
         public void ParseOpenGl1_ReturnsApiWithCorrectProperties()
         {
             var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_0"" number=""1.0""></feature>");
@@ -284,72 +350,6 @@ namespace GLCSGenTests
             Assert.Throws<GlFeatureNotOpenGl1Exception>(() => GlApi.ParseOpenGl1(element,
                                                                                  new Dictionary<string, IEnumerable<IGlEnumeration>>(),
                                                                                  Enumerable.Empty<IGlCommand>()));
-        }
-
-        [Test]
-        public void ParseOpenGL1_IncludesCommands()
-        {
-            var allCommands = new[]
-            {
-                new GlCommand("glAccum", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
-            };
-
-            var element = XElement.Parse(@"
-                <feature api=""gl"" name=""GL_VERSION_1_0"" number=""1.0"">
-                    <require>
-                        <command name=""glAccum""/>
-                    </require>
-                </feature>");
-
-            var api = GlApi.ParseOpenGl1(element, new Dictionary<string, IEnumerable<IGlEnumeration>>(), allCommands);
-            Assert.That(api.Commands, Has.Count.EqualTo(1));
-            Assert.That(api.Commands[0], Is.SameAs(allCommands[0]));
-        }
-
-        [Test]
-        public void ParseOpenGL1_IncludesEnumsUsingCommandParameterGroups()
-        {
-            var enumerationsByGroup = new Dictionary<string, IEnumerable<IGlEnumeration>>
-            {
-                ["AccumOp"] = new[] { new GlEnumeration("Test1", 0u), new GlEnumeration("Test2", 1u) },
-                ["OtherEnum"] = new[] { new GlEnumeration("Test3", 2u), new GlEnumeration("Test4", 3u) },
-            };
-
-            var allCommands = new[]
-            {
-                new GlCommand("glAccum",
-                              new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
-                              new[] {new GlParameter(new GlTypeDescription(GlBaseType.Enum, GlTypeModifier.None), "AccumOp", "op"),}),
-            };
-
-            var element = XElement.Parse(@"
-                <feature api=""gl"" name=""GL_VERSION_1_0"" number=""1.0"">
-                    <require>
-                        <command name=""glAccum""/>
-                    </require>
-                </feature>");
-
-            var api = GlApi.ParseOpenGl1(element, enumerationsByGroup, allCommands);
-            Assert.That(api.Enumerations, Has.Count.EqualTo(2));
-            Assert.That(api.Enumerations, Is.EquivalentTo(enumerationsByGroup["AccumOp"]));
-        }
-
-        [Test]
-        public void ParsesGlEs1Api()
-        {
-            Assert.Fail();
-            //var element = XElement.Parse(@"<feature api=""gles1"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.GlEs));
-        }
-
-        [Test]
-        public void ParsesGlEs2Api()
-        {
-            Assert.Fail();
-            //var element = XElement.Parse(@"<feature api=""gles2"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.GlEs));
         }
     }
 }
