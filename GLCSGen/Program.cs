@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.IO;
 using System.Xml.Linq;
 using CommandLine;
 using GLCSGen.Spec;
@@ -17,15 +17,66 @@ namespace GLCSGen
 
             var spec = new GlSpec(XDocument.Load(options.GlSpecFile));
 
-            foreach (var feature in spec.Features)
+            var outputPath = options.OutputPath;
+            if (!Directory.Exists(outputPath))
             {
-                Console.WriteLine("Feature: {0} {1} {2}", feature.Api, feature.Name, feature.Version);
-                Console.WriteLine("  {0} enumerations", feature.Enumerations.Count);
-                Console.WriteLine("  {0} commands", feature.Commands.Count);
-                Console.WriteLine();
+                Directory.CreateDirectory(outputPath);
             }
 
-            Console.ReadLine();
+            foreach (var feature in spec.Features)
+            {
+                WriteFeatureToFile(feature, outputPath);
+            }
+        }
+
+        private static void WriteFeatureToFile(IGlFeature feature, string outputPath)
+        {
+            var version = feature.Version.ToString().Replace(".", "");
+            var filePath = Path.Combine(outputPath, $"{feature.Api}{version}.cs");
+            using (var streamWriter = new StreamWriter(filePath))
+            {
+                var code = new CodeWriter(streamWriter);
+
+                code.WriteLine("using System;");
+                code.WriteLine();
+                code.WriteLine("namespace OpenGL");
+                code.WriteOpenBraceAndIndent();
+
+                code.WriteLine($"public static class {feature.Api}{version}");
+                code.WriteOpenBraceAndIndent();
+
+                foreach (var enumeration in feature.Enumerations)
+                {
+                    WriteEnumeration(code, enumeration);
+                }
+
+                code.DedentAndWriteCloseBrace();
+
+                code.DedentAndWriteCloseBrace();
+            }
+        }
+
+        private static void WriteEnumeration(CodeWriter code, IGlEnumeration enumeration)
+        {
+            var type = string.Empty;
+            var value = string.Empty;
+            if (enumeration.Int32Value.HasValue)
+            {
+                type = "int";
+                value = enumeration.Int32Value.Value.ToString();
+            }
+            else if (enumeration.UInt32Value.HasValue)
+            {
+                type = "uint";
+                value = "0x" + enumeration.UInt32Value.Value.ToString("x8");
+            }
+            else if (enumeration.UInt64Value.HasValue)
+            {
+                type = "ulong";
+                value = "0x" + enumeration.UInt64Value.Value.ToString("x16");
+            }
+
+            code.WriteLine($"public const {type} {enumeration.Name} = {value};");
         }
     }
 }
