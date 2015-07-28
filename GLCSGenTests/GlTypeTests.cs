@@ -146,5 +146,17 @@ namespace GLCSGenTests
             var type = GlType.Parse(value);
             Assert.That(type.Base, Is.EqualTo(glTypeBase));
         }
+
+        [TestCase(GlTypeBase.Void, GlTypeModifier.None, "void")]
+        [TestCase(GlTypeBase.Int, GlTypeModifier.None, "int")]
+        [TestCase(GlTypeBase.Char, GlTypeModifier.PointerToConst, "string")]
+        public void CanGenerateCSharpTypeCorrectly(
+            GlTypeBase typeBase,
+            GlTypeModifier modifier,
+            string expectedValue)
+        {
+            var type = new GlType(typeBase, modifier);
+            Assert.That(type.ToCSharpType(), Is.EqualTo(expectedValue));
+        }
     }
 }

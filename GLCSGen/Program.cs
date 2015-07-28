@@ -90,12 +90,12 @@ namespace GLCSGen
 
         private static string GetCSharpArgs(IEnumerable<IGlParameter> parameters)
         {
-            return string.Join(", ", parameters.Select(p => p.Type.Base.GetCSharpType() + " @" + p.Name).ToArray());
+            return string.Join(", ", parameters.Select(p => p.Type.ToCSharpType() + " @" + p.Name).ToArray());
         }
 
-        private static string GetCSharpType(IGlTypeDescription returnType)
+        private static string GetCSharpType(IGlType returnType)
         {
-            return returnType.Base.GetCSharpType();
+            return returnType.ToCSharpType();
         }
 
         private static void WriteEnumeration(CodeWriter code, IGlEnumeration enumeration)

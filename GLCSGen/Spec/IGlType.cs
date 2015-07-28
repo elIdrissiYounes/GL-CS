@@ -1,8 +1,9 @@
 namespace GLCSGen.Spec
 {
-    public interface IGlTypeDescription
+    public interface IGlType
     {
         GlTypeBase Base { get; }
         GlTypeModifier Modifier { get; }
+        string ToCSharpType();
     }
 }

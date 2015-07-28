@@ -7,7 +7,7 @@ namespace GLCSGen.Spec
 {
     public class GlCommand : IGlCommand
     {
-        public GlCommand(string name, IGlTypeDescription returnType, IEnumerable<IGlParameter> parameters)
+        public GlCommand(string name, IGlType returnType, IEnumerable<IGlParameter> parameters)
         {
             Name = name;
             ReturnType = returnType;
@@ -15,7 +15,7 @@ namespace GLCSGen.Spec
         }
 
         public string Name { get; }
-        public IGlTypeDescription ReturnType { get; set; }
+        public IGlType ReturnType { get; set; }
         public IReadOnlyList<IGlParameter> Parameters { get; set; }
 
         public static IGlCommand Parse(XElement commandNode)

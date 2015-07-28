@@ -6,14 +6,14 @@ namespace GLCSGen.Spec
 {
     public class GlParameter : IGlParameter
     {
-        public GlParameter(IGlTypeDescription type, string group, string name)
+        public GlParameter(IGlType type, string group, string name)
         {
             Type = type;
             Group = group;
             Name = name;
         }
 
-        public IGlTypeDescription Type { get; }
+        public IGlType Type { get; }
         public string Group { get; }
         public string Name { get; }
 
