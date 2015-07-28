@@ -186,10 +186,10 @@ namespace GLCSGenTests
             };
 
             var parentApi = new GlApi(GlApiFamily.Gl,
-                                          GlProfileType.Compatibility,
-                                          new Version(1, 0),
-                                          Enumerable.Empty<IGlEnumeration>(),
-                                          commands);
+                                      GlProfileType.Compatibility,
+                                      new Version(1, 0),
+                                      Enumerable.Empty<IGlEnumeration>(),
+                                      commands);
 
             var element = XElement.Parse(@"
                 <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
@@ -202,10 +202,10 @@ namespace GLCSGenTests
                 </feature>");
 
             var api = GlApi.Parse(element,
-                                      parentApi,
-                                      GlProfileType.Compatibility,
-                                      Enumerable.Empty<IGlEnumeration>(),
-                                      commands);
+                                  parentApi,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  commands);
             Assert.That(api.Commands, Is.Empty);
         }
 
@@ -244,10 +244,10 @@ namespace GLCSGenTests
                                    Enumerable.Empty<IGlCommand>());
             var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
             Assert.Throws<GlInvalidParentApiException>(() => GlApi.Parse(element,
-                                                                             parent,
-                                                                             GlProfileType.Compatibility,
-                                                                             Enumerable.Empty<IGlEnumeration>(),
-                                                                             Enumerable.Empty<IGlCommand>()));
+                                                                         parent,
+                                                                         GlProfileType.Compatibility,
+                                                                         Enumerable.Empty<IGlEnumeration>(),
+                                                                         Enumerable.Empty<IGlCommand>()));
         }
 
         [Test]
@@ -262,10 +262,10 @@ namespace GLCSGenTests
             var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
 
             Assert.Throws<GlInvalidParentApiException>(() => GlApi.Parse(element,
-                                                                             parentApi,
-                                                                             GlProfileType.Compatibility,
-                                                                             Enumerable.Empty<IGlEnumeration>(),
-                                                                             Enumerable.Empty<IGlCommand>()));
+                                                                         parentApi,
+                                                                         GlProfileType.Compatibility,
+                                                                         Enumerable.Empty<IGlEnumeration>(),
+                                                                         Enumerable.Empty<IGlCommand>()));
         }
 
         [Test]
@@ -280,10 +280,31 @@ namespace GLCSGenTests
             var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_2_0"" number=""2.0""></feature>");
 
             Assert.Throws<GlInvalidParentApiException>(() => GlApi.Parse(element,
-                                                                             parentApi,
-                                                                             GlProfileType.Compatibility,
-                                                                             Enumerable.Empty<IGlEnumeration>(),
-                                                                             Enumerable.Empty<IGlCommand>()));
+                                                                         parentApi,
+                                                                         GlProfileType.Compatibility,
+                                                                         Enumerable.Empty<IGlEnumeration>(),
+                                                                         Enumerable.Empty<IGlCommand>()));
+        }
+
+        [Test]
+        public void Parse_UsesTheGivenProfileType()
+        {
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            var api = GlApi.Parse(element,
+                                  null,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  Enumerable.Empty<IGlCommand>());
+
+            Assert.That(api.ProfileType, Is.EqualTo(GlProfileType.Compatibility));
+
+            api = GlApi.Parse(element,
+                              null,
+                              GlProfileType.Core,
+                              Enumerable.Empty<IGlEnumeration>(),
+                              Enumerable.Empty<IGlCommand>());
+
+            Assert.That(api.ProfileType, Is.EqualTo(GlProfileType.Core));
         }
 
         [Test]

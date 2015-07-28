@@ -65,8 +65,8 @@ namespace GLCSGen.Spec
             IEnumerable<IGlEnumeration> allEnumerations,
             IEnumerable<IGlCommand> allCommands)
         {
-            var apiFamily = element.Attribute("api").Value == "gl" ? GlApiFamily.Gl : GlApiFamily.GlEs;
-            var version = Version.Parse(element.Attribute("number").Value);
+            var apiFamily = GetApiFamily(element);
+            var version = GetVersion(element);
 
             if (parentApi != null)
             {
@@ -115,7 +115,17 @@ namespace GLCSGen.Spec
                 }
             }
 
-            return new GlApi(apiFamily, GlProfileType.Compatibility, version, enumerations, commands);
+            return new GlApi(apiFamily, profileType, version, enumerations, commands);
+        }
+
+        public static Version GetVersion(XElement element)
+        {
+            return Version.Parse(element.Attribute("number").Value);
+        }
+
+        public static GlApiFamily GetApiFamily(XElement element)
+        {
+            return element.Attribute("api").Value == "gl" ? GlApiFamily.Gl : GlApiFamily.GlEs;
         }
     }
 }
