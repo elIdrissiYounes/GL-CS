@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace GLCSGen.Spec
 {
-    public class GlTypeDescription : IGlTypeDescription
+    public class GlType : IGlTypeDescription
     {
         private static readonly IReadOnlyDictionary<GlTypeModifier, string[]> ModifierSequences = new Dictionary<GlTypeModifier, string[]>
         {
@@ -22,13 +22,13 @@ namespace GLCSGen.Spec
             {GlTypeModifier.PointerToConstPointerToConst, new[] {"const", "*", "const", "*"}}
         };
 
-        public GlTypeDescription(GlBaseType baseType, GlTypeModifier modifier)
+        public GlType(GlTypeBase typeBase, GlTypeModifier modifier)
         {
-            BaseType = baseType;
+            Base = typeBase;
             Modifier = modifier;
         }
 
-        public GlBaseType BaseType { get; }
+        public GlTypeBase Base { get; }
         public GlTypeModifier Modifier { get; }
 
         public static IGlTypeDescription Parse(string value)
@@ -41,7 +41,7 @@ namespace GLCSGen.Spec
             var baseType = GetBaseType(parts);
             var modifier = GetModifier(parts);
 
-            return new GlTypeDescription(baseType, modifier);
+            return new GlType(baseType, modifier);
         }
 
         private static GlTypeModifier GetModifier(IEnumerable<string> parts)
@@ -51,7 +51,7 @@ namespace GLCSGen.Spec
                        .FirstOrDefault(modifier => parts.SequenceEqual(ModifierSequences[modifier]));
         }
 
-        private static GlBaseType GetBaseType(IList<string> parts)
+        private static GlTypeBase GetBaseType(IList<string> parts)
         {
             string baseType;
             if (parts[0] == "const")
@@ -84,7 +84,7 @@ namespace GLCSGen.Spec
                 baseType = baseType.Substring(0, baseType.Length - 3);
             }
 
-            return (GlBaseType)Enum.Parse(typeof(GlBaseType), baseType, true);
+            return (GlTypeBase)Enum.Parse(typeof(GlTypeBase), baseType, true);
         }
     }
 }

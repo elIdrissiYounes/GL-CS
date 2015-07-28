@@ -46,7 +46,7 @@ namespace GLCSGenTests
                                       new[]
                                       {
                                           new GlCommand("glAccum",
-                                                        new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
+                                                        new GlType(GlTypeBase.Void, GlTypeModifier.None),
                                                         Enumerable.Empty<IGlParameter>())
                                       });
 
@@ -101,7 +101,7 @@ namespace GLCSGenTests
                     </require>
                 </feature>");
 
-            var commands = new[] {new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
+            var commands = new[] {new GlCommand("glDrawArrays", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
 
             var api = GlApi.Parse(element, null, GlProfileType.Compatibility, Enumerable.Empty<IGlEnumeration>(), commands);
             Assert.That(api.Commands, Has.Count.EqualTo(1));
@@ -118,7 +118,7 @@ namespace GLCSGenTests
                                       new[]
                                       {
                                           new GlCommand("glDrawArrays",
-                                                        new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
+                                                        new GlType(GlTypeBase.Void, GlTypeModifier.None),
                                                         Enumerable.Empty<IGlParameter>())
                                       });
 
@@ -129,7 +129,7 @@ namespace GLCSGenTests
                     </require>
                 </feature>");
 
-            var commands = new[] {new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
+            var commands = new[] {new GlCommand("glBlendColor", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
 
             var api = GlApi.Parse(element, parentApi, GlProfileType.Compatibility, Enumerable.Empty<IGlEnumeration>(), commands);
             Assert.That(api.Commands, Has.Count.EqualTo(2));
@@ -181,8 +181,8 @@ namespace GLCSGenTests
         {
             var commands = new[]
             {
-                new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
-                new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
+                new GlCommand("glDrawArrays", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
+                new GlCommand("glBlendColor", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
             };
 
             var parentApi = new GlApi(GlApiFamily.Gl,
@@ -224,8 +224,8 @@ namespace GLCSGenTests
 
             var commands = new[]
             {
-                new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
-                new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
+                new GlCommand("glDrawArrays", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
+                new GlCommand("glBlendColor", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
             };
 
             var api = GlApi.Parse(element, null, GlProfileType.Compatibility, Enumerable.Empty<IGlEnumeration>(), commands);
@@ -312,7 +312,7 @@ namespace GLCSGenTests
         {
             var allCommands = new[]
             {
-                new GlCommand("glAccum", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
+                new GlCommand("glAccum", new GlType(GlTypeBase.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
             };
 
             var element = XElement.Parse(@"
@@ -339,8 +339,8 @@ namespace GLCSGenTests
             var allCommands = new[]
             {
                 new GlCommand("glAccum",
-                              new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
-                              new[] {new GlParameter(new GlTypeDescription(GlBaseType.Enum, GlTypeModifier.None), "AccumOp", "op")})
+                              new GlType(GlTypeBase.Void, GlTypeModifier.None),
+                              new[] {new GlParameter(new GlType(GlTypeBase.Enum, GlTypeModifier.None), "AccumOp", "op")})
             };
 
             var element = XElement.Parse(@"

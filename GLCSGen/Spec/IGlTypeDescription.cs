@@ -2,7 +2,7 @@ namespace GLCSGen.Spec
 {
     public interface IGlTypeDescription
     {
-        GlBaseType BaseType { get; }
+        GlTypeBase Base { get; }
         GlTypeModifier Modifier { get; }
     }
 }

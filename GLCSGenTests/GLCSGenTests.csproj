@@ -55,7 +55,7 @@
     <Compile Include="CodeWriterTests.cs" />
     <Compile Include="GlCommandTests.cs" />
     <Compile Include="GlApiTests.cs" />
-    <Compile Include="GlTypeDescriptionTests.cs" />
+    <Compile Include="GlTypeTests.cs" />
     <Compile Include="GlParametersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GlEnumerationTests.cs" />

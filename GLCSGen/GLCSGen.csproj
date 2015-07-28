@@ -48,7 +48,7 @@
     <Compile Include="CodeWriter.cs" />
     <Compile Include="CommandLineOptions.cs" />
     <Compile Include="Spec\GlApiFamily.cs" />
-    <Compile Include="Spec\GlBaseType.cs" />
+    <Compile Include="Spec\GlTypeBase.cs" />
     <Compile Include="Spec\GlCommand.cs" />
     <Compile Include="Spec\GlEnumeration.cs" />
     <Compile Include="Spec\GlApi.cs" />
@@ -57,7 +57,8 @@
     <Compile Include="Spec\GlParameter.cs" />
     <Compile Include="Spec\GlProfileType.cs" />
     <Compile Include="Spec\GlSpec.cs" />
-    <Compile Include="Spec\GlTypeDescription.cs" />
+    <Compile Include="Spec\GlType.cs" />
+    <Compile Include="GlTypeBaseExtensions.cs" />
     <Compile Include="Spec\GlTypeModifier.cs" />
     <Compile Include="Spec\IGlCommand.cs" />
     <Compile Include="Spec\IGlEnumeration.cs" />

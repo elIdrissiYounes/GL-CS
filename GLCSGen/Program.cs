@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using CommandLine;
 using GLCSGen.Spec;
@@ -15,6 +18,7 @@ namespace GLCSGen
                 return;
             }
 
+            Console.WriteLine("Reading spec from {0}", options.GlSpecFile);
             var spec = new GlSpec(XDocument.Load(options.GlSpecFile));
 
             var outputPath = options.OutputPath;
@@ -37,6 +41,8 @@ namespace GLCSGen
                 name += api.ProfileType.ToString();
             }
             var filePath = Path.Combine(outputPath, $"{name}.cs");
+
+            Console.WriteLine("Writing {0} {1} ({2}) to {3}", api.ApiFamily, api.Version, api.ProfileType, filePath);
             using (var streamWriter = new StreamWriter(filePath))
             {
                 var code = new CodeWriter(streamWriter);
@@ -49,15 +55,47 @@ namespace GLCSGen
                 code.WriteLine($"public static class {name}");
                 code.WriteOpenBraceAndIndent();
 
-                foreach (var enumeration in api.Enumerations)
+                foreach (var enumeration in api.Enumerations.OrderBy(e => e.Name))
                 {
                     WriteEnumeration(code, enumeration);
+                }
+
+                foreach (var cmd in api.Commands.OrderBy(c => c.Name))
+                {
+                    code.WriteLine();
+                    WriteCommand(code, cmd);
                 }
 
                 code.DedentAndWriteCloseBrace();
 
                 code.DedentAndWriteCloseBrace();
             }
+        }
+
+        private static void WriteCommand(CodeWriter code, IGlCommand cmd)
+        {
+            var returnType = GetCSharpType(cmd.ReturnType);
+            var args = GetCSharpArgs(cmd.Parameters);
+
+            code.WriteLine("private delegate {0} {1}Func({2});", returnType, cmd.Name, args);
+            code.WriteLine("private static {0}Func {0}Ptr;", cmd.Name);
+            code.WriteLine("public static {0} {1}({2})", returnType, cmd.Name, args);
+            code.WriteOpenBraceAndIndent();
+
+            var argsInCall = string.Join(", ", cmd.Parameters.Select(p => "@" + p.Name));
+            code.WriteLine(returnType != "void" ? "return {0}Ptr({1});" : "{0}Ptr({1});", cmd.Name, argsInCall);
+
+            code.DedentAndWriteCloseBrace();
+        }
+
+        private static string GetCSharpArgs(IEnumerable<IGlParameter> parameters)
+        {
+            return string.Join(", ", parameters.Select(p => p.Type.Base.GetCSharpType() + " @" + p.Name).ToArray());
+        }
+
+        private static string GetCSharpType(IGlTypeDescription returnType)
+        {
+            return returnType.Base.GetCSharpType();
         }
 
         private static void WriteEnumeration(CodeWriter code, IGlEnumeration enumeration)

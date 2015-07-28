@@ -27,7 +27,7 @@ namespace GLCSGen.Spec
                                         .Select(t => t.StartsWith("GL") ? t.Substring(2) : t)
                                         .Aggregate("", (a, b) => a + b);
             var parameters = commandNode.Elements("param").Select(GlParameter.Parse).ToList();
-            var glCommand = new GlCommand(name, GlTypeDescription.Parse(returnType), parameters);
+            var glCommand = new GlCommand(name, GlType.Parse(returnType), parameters);
             return glCommand;
         }
     }

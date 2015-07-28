@@ -49,7 +49,7 @@ namespace GLCSGen.Spec
             var enumerationsToAdd = new List<IGlEnumeration>();
             foreach (var parameter in from command in commandsToAdd
                                       from parameter in command.Parameters
-                                      where parameter.Type.BaseType == GlBaseType.Enum && !string.IsNullOrEmpty(parameter.Group)
+                                      where parameter.Type.Base == GlTypeBase.Enum && !string.IsNullOrEmpty(parameter.Group)
                                       select parameter)
             {
                 enumerationsToAdd.AddRange(allEnumerationsByGroup[parameter.Group]);

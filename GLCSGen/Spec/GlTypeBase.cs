@@ -1,6 +1,6 @@
 namespace GLCSGen.Spec
 {
-    public enum GlBaseType
+    public enum GlTypeBase
     {
         Bitfield,
         Boolean,

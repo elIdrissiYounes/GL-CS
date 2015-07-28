@@ -27,7 +27,7 @@ namespace GLCSGen.Spec
                                 .Select(t => t.StartsWith("GL") ? t.Substring(2) : t)
                                 .Aggregate("", (a, b) => a + b);
 
-            return new GlParameter(GlTypeDescription.Parse(type), group, paramName);
+            return new GlParameter(GlType.Parse(type), group, paramName);
         }
     }
 }
