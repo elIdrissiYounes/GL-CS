@@ -79,13 +79,14 @@ namespace GLCSGen
 
             code.WriteLine("private delegate {0} {1}Func({2});", returnType, cmd.Name, args);
             code.WriteLine("private static {0}Func {0}Ptr;", cmd.Name);
-            code.WriteLine("public static {0} {1}({2})", returnType, cmd.Name, args);
-            code.WriteOpenBraceAndIndent();
 
             var argsInCall = string.Join(", ", cmd.Parameters.Select(p => "@" + p.Name));
-            code.WriteLine(returnType != "void" ? "return {0}Ptr({1});" : "{0}Ptr({1});", cmd.Name, argsInCall);
-
-            code.DedentAndWriteCloseBrace();
+            code.WriteLine(
+                "public static {0} {1}({2}) => " + (returnType != "void" ? "return {1}Ptr({3});" : "{1}Ptr({3});"),
+                returnType, 
+                cmd.Name, 
+                args,
+                argsInCall);
         }
 
         private static string GetCSharpArgs(IEnumerable<IGlParameter> parameters)
