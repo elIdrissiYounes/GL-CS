@@ -11,86 +11,116 @@ namespace GLCSGenTests
     public class GlApiTests
     {
         [Test]
-        public void Parse_CanRemoveCommandsFromInheritedFeature()
+        public void Parse_CanReadTheApiFamily()
         {
-            Assert.Fail();
-            //var glCommand = new GlCommand("glDrawArrays",
-            //                              new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
-            //                              Enumerable.Empty<IGlParameter>());
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            var api = GlApi.Parse(element,
+                                  null,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  Enumerable.Empty<IGlCommand>());
 
-            //var parentFeature = new GlApi(GlApiFamily.Gl,
-            //                              GlProfileType.Compatibility,
-            //                              new Version(1, 0),
-            //                              Enumerable.Empty<IGlEnumeration>(),
-            //                              new[] {glCommand});
-
-            //var childFeature = new GlApi(GlApiFamily.Gl,
-            //                             GlProfileType.Compatibility,
-            //                             new Version(2, 0),
-            //                             Enumerable.Empty<IGlEnumeration>(),
-            //                             Enumerable.Empty<IGlCommand>(),
-            //                             parentFeature,
-            //                             Enumerable.Empty<IGlEnumeration>(),
-            //                             new[] {glCommand});
-
-            //Assert.That(childFeature.Commands, Is.Empty);
+            Assert.That(api.ApiFamily, Is.EqualTo(GlApiFamily.Gl));
         }
 
         [Test]
-        public void Parse_CanRemoveEnumsFromInheritedFeature()
+        public void Parse_CanReadTheVersion()
         {
-            Assert.Fail();
-            //var glEnumeration = new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u);
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            var api = GlApi.Parse(element,
+                                  null,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  Enumerable.Empty<IGlCommand>());
 
-            //var parentFeature = new GlApi(GlApiFamily.Gl,
-            //                              GlProfileType.Compatibility,
-            //                              new Version(1, 0),
-            //                              new[] {glEnumeration},
-            //                              Enumerable.Empty<IGlCommand>());
+            Assert.That(api.Version, Is.EqualTo(new Version(1, 1)));
+        }
 
-            //var childFeature = new GlApi(GlApiFamily.Gl,
-            //                             GlProfileType.Compatibility,
-            //                             new Version(2, 0),
-            //                             Enumerable.Empty<IGlEnumeration>(),
-            //                             Enumerable.Empty<IGlCommand>(),
-            //                             parentFeature,
-            //                             new[] {glEnumeration},
-            //                             Enumerable.Empty<IGlCommand>());
+        [Test]
+        public void Parse_CanRemoveCommandsFromParentApi()
+        {
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                      GlProfileType.Compatibility,
+                                      new Version(1, 0),
+                                      Enumerable.Empty<IGlEnumeration>(),
+                                      new[]
+                                      {
+                                          new GlCommand("glAccum",
+                                                        new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
+                                                        Enumerable.Empty<IGlParameter>())
+                                      });
 
-            //Assert.That(childFeature.Enumerations, Is.Empty);
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <remove>
+                        <command name=""glAccum"" />
+                    </remove>
+                </feature>");
+
+            var api = GlApi.Parse(element,
+                                  parentApi,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  Enumerable.Empty<IGlCommand>());
+
+            Assert.That(api.Commands, Is.Empty);
+        }
+
+        [Test]
+        public void Parse_CanRemoveEnumsFromParentApi()
+        {
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                      GlProfileType.Compatibility,
+                                      new Version(1, 0),
+                                      new[] {new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u)},
+                                      Enumerable.Empty<IGlCommand>());
+
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <remove>
+                        <enum name=""GL_DEPTH_BUFFER_BIT"" />
+                    </remove>
+                </feature>");
+
+            var api = GlApi.Parse(element,
+                                  parentApi,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  Enumerable.Empty<IGlCommand>());
+
+            Assert.That(api.Enumerations, Is.Empty);
         }
 
         [Test]
         public void Parse_IncludesCommands()
         {
-            Assert.Fail();
-            //var element = XElement.Parse(@"
-            //    <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
-            //        <require>
-            //            <command name=""glDrawArrays""/>
-            //        </require>
-            //    </feature>");
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <command name=""glDrawArrays""/>
+                    </require>
+                </feature>");
 
-            //var commands = new[] {new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
+            var commands = new[] {new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
 
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), commands);
-            //Assert.That(feature.Commands, Has.Count.EqualTo(1));
-            //Assert.That(feature.Commands[0].Name, Is.EqualTo("glDrawArrays"));
+            var api = GlApi.Parse(element, null, GlProfileType.Compatibility, Enumerable.Empty<IGlEnumeration>(), commands);
+            Assert.That(api.Commands, Has.Count.EqualTo(1));
+            Assert.That(api.Commands[0].Name, Is.EqualTo("glDrawArrays"));
         }
 
         [Test]
-        public void Parse_IncludesCommandsFromInheritedFeature()
+        public void Parse_IncludesCommandsFromParentApi()
         {
-            var parentFeature = new GlApi(GlApiFamily.Gl,
-                                          GlProfileType.Compatibility,
-                                          new Version(1, 0),
-                                          Enumerable.Empty<IGlEnumeration>(),
-                                          new[]
-                                          {
-                                              new GlCommand("glDrawArrays",
-                                                            new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
-                                                            Enumerable.Empty<IGlParameter>())
-                                          });
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                      GlProfileType.Compatibility,
+                                      new Version(1, 0),
+                                      Enumerable.Empty<IGlEnumeration>(),
+                                      new[]
+                                      {
+                                          new GlCommand("glDrawArrays",
+                                                        new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None),
+                                                        Enumerable.Empty<IGlParameter>())
+                                      });
 
             var element = XElement.Parse(@"
                 <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
@@ -101,179 +131,159 @@ namespace GLCSGenTests
 
             var commands = new[] {new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())};
 
-            var childFeature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), commands, parentFeature, GlProfileType.Compatibility);
-            Assert.That(childFeature.Commands, Has.Count.EqualTo(2));
-            Assert.That(childFeature.Commands[0].Name, Is.EqualTo("glDrawArrays"));
-            Assert.That(childFeature.Commands[1].Name, Is.EqualTo("glBlendColor"));
+            var api = GlApi.Parse(element, parentApi, GlProfileType.Compatibility, Enumerable.Empty<IGlEnumeration>(), commands);
+            Assert.That(api.Commands, Has.Count.EqualTo(2));
+            Assert.That(api.Commands[0].Name, Is.EqualTo("glDrawArrays"));
+            Assert.That(api.Commands[1].Name, Is.EqualTo("glBlendColor"));
         }
 
         [Test]
         public void Parse_IncludesEnumerations()
         {
-            Assert.Fail();
-            //var element = XElement.Parse(@"
-            //    <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
-            //        <require>
-            //            <enum name=""GL_DEPTH_BUFFER_BIT""/>
-            //        </require>
-            //    </feature>");
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <enum name=""GL_DEPTH_BUFFER_BIT""/>
+                    </require>
+                </feature>");
 
-            //var enumerations = new[] {new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u)};
+            var enumerations = new[] {new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u)};
 
-            //var feature = GlApi.Parse(element, enumerations, Enumerable.Empty<IGlCommand>(), null, GlProfileType.Compatibility);
-            //Assert.That(feature.Enumerations, Has.Count.EqualTo(1));
-            //Assert.That(feature.Enumerations[0].Name, Is.EqualTo("GL_DEPTH_BUFFER_BIT"));
-            //Assert.That(feature.Enumerations[0].UInt32Value, Is.EqualTo(0));
+            var api = GlApi.Parse(element, null, GlProfileType.Compatibility, enumerations, Enumerable.Empty<IGlCommand>());
+            Assert.That(api.Enumerations, Has.Count.EqualTo(1));
+            Assert.That(api.Enumerations[0].Name, Is.EqualTo("GL_DEPTH_BUFFER_BIT"));
+            Assert.That(api.Enumerations[0].UInt32Value, Is.EqualTo(0));
         }
 
         [Test]
-        public void Parse_IncludesEnumerationsFromInheritedFeature()
+        public void Parse_IncludesEnumerationsFromParentApi()
         {
-            Assert.Fail();
-            //var parentFeature = new GlApi(GlApiFamily.Gl,
-            //                              GlProfileType.Compatibility,
-            //                              new Version(1, 0),
-            //                              new[] {new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u)},
-            //                              Enumerable.Empty<IGlCommand>());
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                      GlProfileType.Compatibility,
+                                      new Version(1, 0),
+                                      new[] {new GlEnumeration("GL_DEPTH_BUFFER_BIT", 0u)},
+                                      Enumerable.Empty<IGlCommand>());
 
-            //var childFeature = new GlApi(GlApiFamily.Gl,
-            //                             GlProfileType.Compatibility,
-            //                             new Version(2, 0),
-            //                             Enumerable.Empty<IGlEnumeration>(),
-            //                             Enumerable.Empty<IGlCommand>(),
-            //                             parentFeature);
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            var api = GlApi.Parse(element,
+                                  parentApi,
+                                  GlProfileType.Compatibility,
+                                  Enumerable.Empty<IGlEnumeration>(),
+                                  Enumerable.Empty<IGlCommand>());
 
-            //Assert.That(childFeature.Enumerations, Has.Count.EqualTo(1));
-            //Assert.That(childFeature.Enumerations[0].Name, Is.EqualTo("GL_DEPTH_BUFFER_BIT"));
-            //Assert.That(childFeature.Enumerations[0].UInt32Value, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void Parse_ParsesGlApi()
-        {
-            Assert.Fail();
-            //var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.Gl));
-        }
-
-        [Test]
-        public void Parse_ParsesGlEs1Api()
-        {
-            Assert.Fail();
-            //var element = XElement.Parse(@"<feature api=""gles1"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.GlEs));
-        }
-
-        [Test]
-        public void Parse_ParsesGlEs2Api()
-        {
-            Assert.Fail();
-            //var element = XElement.Parse(@"<feature api=""gles2"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            //Assert.That(feature.ApiFamily, Is.EqualTo(GlApiFamily.GlEs));
-        }
-
-        [Test]
-        public void Parse_ParsesVersion()
-        {
-            Assert.Fail();
-            //var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), Enumerable.Empty<IGlCommand>());
-            //Assert.That(feature.Version, Is.EqualTo(new Version(1, 1)));
+            Assert.That(api.Enumerations, Has.Count.EqualTo(1));
+            Assert.That(api.Enumerations[0].Name, Is.EqualTo("GL_DEPTH_BUFFER_BIT"));
+            Assert.That(api.Enumerations[0].UInt32Value, Is.EqualTo(0));
         }
 
         [Test]
         public void Parse_SupportsMultipleRemoveElements()
         {
-            Assert.Fail();
-            //var commands = new[]
-            //{
-            //    new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
-            //    new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
-            //};
+            var commands = new[]
+            {
+                new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
+                new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
+            };
 
-            //var parentFeature = new GlApi(GlApiFamily.Gl,
-            //                              GlProfileType.Compatibility,
-            //                              new Version(1, 0),
-            //                              Enumerable.Empty<IGlEnumeration>(),
-            //                              commands);
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                          GlProfileType.Compatibility,
+                                          new Version(1, 0),
+                                          Enumerable.Empty<IGlEnumeration>(),
+                                          commands);
 
-            //var element = XElement.Parse(@"
-            //    <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
-            //        <remove>
-            //            <command name=""glDrawArrays""/>
-            //        </remove>
-            //        <remove>
-            //            <command name=""glBlendColor""/>
-            //        </remove>
-            //    </feature>");
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <remove>
+                        <command name=""glDrawArrays""/>
+                    </remove>
+                    <remove>
+                        <command name=""glBlendColor""/>
+                    </remove>
+                </feature>");
 
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), commands, parentFeature);
-            //Assert.That(feature.Commands, Is.Empty);
+            var api = GlApi.Parse(element,
+                                      parentApi,
+                                      GlProfileType.Compatibility,
+                                      Enumerable.Empty<IGlEnumeration>(),
+                                      commands);
+            Assert.That(api.Commands, Is.Empty);
         }
 
         [Test]
         public void Parse_SupportsMultipleRequireElements()
         {
-            Assert.Fail();
-            //var element = XElement.Parse(@"
-            //    <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
-            //        <require>
-            //            <command name=""glDrawArrays""/>
-            //        </require>
-            //        <require>
-            //            <command name=""glBlendColor""/>
-            //        </require>
-            //    </feature>");
+            var element = XElement.Parse(@"
+                <feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1"">
+                    <require>
+                        <command name=""glDrawArrays""/>
+                    </require>
+                    <require>
+                        <command name=""glBlendColor""/>
+                    </require>
+                </feature>");
 
-            //var commands = new[]
-            //{
-            //    new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
-            //    new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
-            //};
+            var commands = new[]
+            {
+                new GlCommand("glDrawArrays", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>()),
+                new GlCommand("glBlendColor", new GlTypeDescription(GlBaseType.Void, GlTypeModifier.None), Enumerable.Empty<IGlParameter>())
+            };
 
-            //var feature = GlApi.Parse(element, Enumerable.Empty<IGlEnumeration>(), commands);
-            //Assert.That(feature.Commands, Has.Count.EqualTo(2));
-            //Assert.That(feature.Commands[0].Name, Is.EqualTo("glDrawArrays"));
-            //Assert.That(feature.Commands[1].Name, Is.EqualTo("glBlendColor"));
+            var api = GlApi.Parse(element, null, GlProfileType.Compatibility, Enumerable.Empty<IGlEnumeration>(), commands);
+            Assert.That(api.Commands, Has.Count.EqualTo(2));
+            Assert.That(api.Commands[0].Name, Is.EqualTo("glDrawArrays"));
+            Assert.That(api.Commands[1].Name, Is.EqualTo("glBlendColor"));
+        }
+
+        [Test]
+        public void Parse_ThrowsExceptionIfChildHasDifferentApiFamily()
+        {
+            var parent = new GlApi(GlApiFamily.GlEs,
+                                   GlProfileType.Compatibility,
+                                   new Version(1, 0),
+                                   Enumerable.Empty<IGlEnumeration>(),
+                                   Enumerable.Empty<IGlCommand>());
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+            Assert.Throws<GlInvalidParentApiException>(() => GlApi.Parse(element,
+                                                                             parent,
+                                                                             GlProfileType.Compatibility,
+                                                                             Enumerable.Empty<IGlEnumeration>(),
+                                                                             Enumerable.Empty<IGlCommand>()));
         }
 
         [Test]
         public void Parse_ThrowsIfChildHasLowerVersionThanParent()
         {
-            Assert.Fail();
-            //var parentFeature = new GlApi(GlApiFamily.Gl,
-            //                              GlProfileType.Compatibility,
-            //                              new Version(2, 0),
-            //                              Enumerable.Empty<IGlEnumeration>(),
-            //                              Enumerable.Empty<IGlCommand>());
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                      GlProfileType.Compatibility,
+                                      new Version(2, 0),
+                                      Enumerable.Empty<IGlEnumeration>(),
+                                      Enumerable.Empty<IGlCommand>());
 
-            //Assert.Throws<GlInvalidParentFeatureException>(() => new GlApi(GlApiFamily.Gl,
-            //                                                               GlProfileType.Compatibility,
-            //                                                               new Version(1, 0),
-            //                                                               Enumerable.Empty<IGlEnumeration>(),
-            //                                                               Enumerable.Empty<IGlCommand>(),
-            //                                                               parentFeature));
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_1_1"" number=""1.1""></feature>");
+
+            Assert.Throws<GlInvalidParentApiException>(() => GlApi.Parse(element,
+                                                                             parentApi,
+                                                                             GlProfileType.Compatibility,
+                                                                             Enumerable.Empty<IGlEnumeration>(),
+                                                                             Enumerable.Empty<IGlCommand>()));
         }
 
         [Test]
         public void Parse_ThrowsIfChildHasSameVersionThanParent()
         {
-            Assert.Fail();
-            //var parentFeature = new GlApi(GlApiFamily.Gl,
-            //                              GlProfileType.Compatibility,
-            //                              new Version(2, 0),
-            //                              Enumerable.Empty<IGlEnumeration>(),
-            //                              Enumerable.Empty<IGlCommand>());
+            var parentApi = new GlApi(GlApiFamily.Gl,
+                                      GlProfileType.Compatibility,
+                                      new Version(2, 0),
+                                      Enumerable.Empty<IGlEnumeration>(),
+                                      Enumerable.Empty<IGlCommand>());
 
-            //Assert.Throws<GlInvalidParentFeatureException>(() => new GlApi(GlApiFamily.Gl,
-            //                                                               GlProfileType.Compatibility,
-            //                                                               new Version(2, 0),
-            //                                                               Enumerable.Empty<IGlEnumeration>(),
-            //                                                               Enumerable.Empty<IGlCommand>(),
-            //                                                               parentFeature));
+            var element = XElement.Parse(@"<feature api=""gl"" name=""GL_VERSION_2_0"" number=""2.0""></feature>");
+
+            Assert.Throws<GlInvalidParentApiException>(() => GlApi.Parse(element,
+                                                                             parentApi,
+                                                                             GlProfileType.Compatibility,
+                                                                             Enumerable.Empty<IGlEnumeration>(),
+                                                                             Enumerable.Empty<IGlCommand>()));
         }
 
         [Test]

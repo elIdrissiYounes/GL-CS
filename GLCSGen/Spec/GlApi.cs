@@ -35,7 +35,7 @@ namespace GLCSGen.Spec
             if (element.Attribute("api").Value != "gl" ||
                 element.Attribute("number").Value != "1.0")
             {
-                throw new GlFeatureNotOpenGl1Exception("ParseOpenGl1 can only parse the 1.0 feature of OpenGL");
+                throw new GlFeatureNotOpenGl1Exception();
             }
 
             var commandsToAdd = new List<IGlCommand>();
@@ -60,53 +60,62 @@ namespace GLCSGen.Spec
 
         public static IGlApi Parse(
             XElement element,
-            IEnumerable<IGlEnumeration> allEnumerations,
-            IEnumerable<IGlCommand> allCommands,
             IGlApi parentApi,
-            GlProfileType profile)
-        {
-            return null;
-        }
-
-        private static IGlApi Parse(
-            XElement element,
+            GlProfileType profileType,
             IEnumerable<IGlEnumeration> allEnumerations,
-            IEnumerable<IGlCommand> allCommands,
-            IGlApi parentApi = null)
+            IEnumerable<IGlCommand> allCommands)
         {
             var apiFamily = element.Attribute("api").Value == "gl" ? GlApiFamily.Gl : GlApiFamily.GlEs;
-
             var version = Version.Parse(element.Attribute("number").Value);
 
-            var enumerationsToAdd = new List<IGlEnumeration>();
-            var commandsToAdd = new List<IGlCommand>();
+            if (parentApi != null)
+            {
+                if (parentApi.Version.CompareTo(version) >= 0 || parentApi.ApiFamily != apiFamily)
+                {
+                    throw new GlInvalidParentApiException();
+                }
+            }
 
-            var enumerationsToRemove = new List<IGlEnumeration>();
-            var commandsToRemove = new List<IGlCommand>();
+            var enumerations = new List<IGlEnumeration>();
+            var commands = new List<IGlCommand>();
+
+            if (parentApi != null)
+            {
+                enumerations.AddRange(parentApi.Enumerations);
+                commands.AddRange(parentApi.Commands);
+            }
 
             foreach (var requireElement in element.Elements("require"))
             {
-                enumerationsToAdd.AddRange(requireElement.Elements("enum")
-                                                         .Select(e => e.Attribute("name").Value)
-                                                         .Select(n => allEnumerations.First(e => e.Name == n)));
+                enumerations.AddRange(requireElement.Elements("enum")
+                                                    .Select(e => e.Attribute("name").Value)
+                                                    .Select(n => allEnumerations.First(e => e.Name == n)));
 
-                commandsToAdd.AddRange(requireElement.Elements("command")
-                                                     .Select(e => e.Attribute("name").Value)
-                                                     .Select(n => allCommands.First(c => c.Name == n)));
+                commands.AddRange(requireElement.Elements("command")
+                                                .Select(e => e.Attribute("name").Value)
+                                                .Select(n => allCommands.First(c => c.Name == n)));
             }
 
             foreach (var removeElement in element.Elements("remove"))
             {
-                enumerationsToRemove.AddRange(removeElement.Elements("enum")
-                                                           .Select(e => e.Attribute("name").Value)
-                                                           .Select(n => allEnumerations.First(e => e.Name == n)));
+                foreach (var removeEnum in removeElement.Elements("enum")
+                                                        .Select(e => e.Attribute("name").Value)
+                                                        .Select(n => enumerations.FirstOrDefault(e => e.Name == n))
+                                                        .Where(removeEnum => removeEnum != null))
+                {
+                    enumerations.Remove(removeEnum);
+                }
 
-                commandsToRemove.AddRange(removeElement.Elements("command")
-                                                       .Select(e => e.Attribute("name").Value)
-                                                       .Select(n => allCommands.First(c => c.Name == n)));
+                foreach (var removeCommand in removeElement.Elements("command")
+                                                           .Select(e => e.Attribute("name").Value)
+                                                           .Select(n => commands.FirstOrDefault(c => c.Name == n))
+                                                           .Where(removeCommand => removeCommand != null))
+                {
+                    commands.Remove(removeCommand);
+                }
             }
 
-            return new GlApi(apiFamily, GlProfileType.Compatibility, version, enumerationsToAdd, commandsToAdd);
+            return new GlApi(apiFamily, GlProfileType.Compatibility, version, enumerations, commands);
         }
     }
 }
