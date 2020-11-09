@@ -65,7 +65,7 @@ namespace GLCSGen
             var glesDirectory = new DirectoryInfo(Path.Combine(directory.FullName, "GLES-CS"));
 
             // Load the spec
-            var spec = GLSpec.FromFile("gl.xml");
+            var spec = GLSpec.FromFile(Path.Combine(directory.FullName, "GLCSGen", "gl.xml"));
 
             //using (var stream = File.Create("spec.xml"))
             //{
